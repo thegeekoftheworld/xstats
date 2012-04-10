@@ -15,7 +15,14 @@
                 }, config));
             }
 
-            var seriesCfg = { strokeStyle: '#00FF00', fillStyle: 'rgba(0, 255, 0, 0.4)', lineWidth: 3 }
+            function colouredSeries(colour)
+            {
+                return {
+                    strokeStyle: colour || '#00FF00',
+                    fillStyle: 'rgba(0, 255, 0, 0.4)',
+                    lineWidth: 3
+                };
+            }
 
             $(document).ready(function() {
                 var charts = {
@@ -45,7 +52,11 @@
                 }
 
                 var series = {
-                    cpu: new TimeSeries(),
+                    cpu: {
+                        avg1min : new TimeSeries(),
+                        avg5min : new TimeSeries(),
+                        avg15min: new TimeSeries()
+                    },
                     rtl: new TimeSeries(),
                     txp: new TimeSeries(),
                     rxp: new TimeSeries(),
@@ -62,7 +73,9 @@
                 {
                     var data = $.parseJSON(evt.data);
 
-                    series.cpu.append(new Date().getTime(), parseFloat(data.cpu.avg[0]));
+                    series.cpu.avg1min.append(new Date().getTime(), parseFloat(data.cpu.avg[0]));
+                    series.cpu.avg5min.append(new Date().getTime(), parseFloat(data.cpu.avg[1]));
+                    series.cpu.avg15min.append(new Date().getTime(), parseFloat(data.cpu.avg[2]));
 
                     /*series.rtl.append(new Date().getTime(), parseInt(data.rtl));*/
                     /*series.txp.append(new Date().getTime(), parseInt(data.txp));*/
@@ -79,9 +92,15 @@
                     $("#rxs_val").html(data.net['wlan0'].bytes_sent_sec)
                 }
 
+                charts.cpu.addTimeSeries(series.cpu.avg1min, colouredSeries());
+                charts.cpu.addTimeSeries(series.cpu.avg5min, colouredSeries("#FFFF00"));
+                charts.cpu.addTimeSeries(series.cpu.avg15min, colouredSeries("#FF0000"));
+
                 for(var key in charts)
                 {
-                    charts[key].addTimeSeries(series[key], seriesCfg);
+                    if(key != "cpu")
+                        charts[key].addTimeSeries(series[key], colouredSeries());
+
                     charts[key].streamTo(document.getElementById(key), 1000);
                 }
             })
