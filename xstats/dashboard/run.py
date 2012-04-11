@@ -7,13 +7,15 @@ import gevent
 from bottle import run, route, get, template, static_file
 from bottle.ext.websocket import GeventWebSocketServer, websocket
 
+interval = 0.2          # Refresh send interval (In seconds)
+
 previous_stats = None
-clients = set()
-interval = 0.2
+clients = set()         # Set of connected websocket clients
 
 def get_stats():
     global previous_stats
 
+    # Assuemble statistics
     stats = {
         'cpu': {
             'pct': psutil.cpu_percent(percpu = True),
@@ -24,7 +26,10 @@ def get_stats():
         'net': {iface: data._asdict() for iface, data in psutil.network_io_counters(True).iteritems()}
     }
 
+    # Iterate over interfaces
     for iface, data in stats['net'].iteritems():
+
+        # Set to zero if interface doesn't exist or previous_stats are zero
         if not previous_stats or not iface in previous_stats['net']:
             data['packets_recv_sec'] = 0
             data['packets_sent_sec'] = 0
@@ -33,7 +38,10 @@ def get_stats():
 
             continue
 
+        # Calculate packet/byte rate/s
         if previous_stats:
+
+            # Alias for previous stats
             old_data = previous_stats['net'][iface]
 
             data['packets_recv_sec'] = (data['packets_recv'] - old_data['packets_recv']) / interval
@@ -42,11 +50,13 @@ def get_stats():
             data['bytes_sent_sec']   = (data['bytes_sent']   - old_data['bytes_sent'])   / interval
 
 
-
+    # Save previous state
     previous_stats = stats
     return stats
 
 def stats_loop():
+    """Update and send out the statistics."""
+
     while True:
         json_string = json.dumps(get_stats())
         for client in clients:
