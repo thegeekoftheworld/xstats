@@ -1,15 +1,34 @@
 import psutil
 import time
 
-def get_network_throughput_avg(sample_time = 1, interface = None):
+def _get_network_avg(attributes, sample_time = 1, interface = None):
     """
-    Get the average network throughput for a specified `sample_time`, results
-    in bytes/s.
+    Get the average of a network related `attributes` for a
+    specified `sample_time`
 
     Will show results for all interfaces or for `interface`.
 
-    :returns: Tuple (bytes_out, bytes_in)
+    :returns: List (attribute1, attribute2)
     """
+
+    def calculate_average(attribute, old_values, new_values):
+        """
+        Calculate the average for `attribute` fetching it from
+        the old_values/new_values namedtuples.
+
+        :returns: Average value for 1 second for `attribute`
+        """
+
+        # Calculate differences
+        old_value = getattr(old_values, attribute)
+        new_value = getattr(new_values, attribute)
+
+        attr_difference = new_value - old_value
+
+        # Get actual throughput/s
+        attr_second = attr_difference / sample_time
+
+        return attr_second
 
     # Fetch network_io_counters, only fetch per inteface if we are checking
     # a specific inteface.
@@ -23,12 +42,17 @@ def get_network_throughput_avg(sample_time = 1, interface = None):
     if interface:
         end_sample = end_sample[interface]
 
-    # Calculate differences
-    sent_difference = end_sample.bytes_sent - start_sample.bytes_sent
-    recv_difference = end_sample.bytes_recv - start_sample.bytes_recv
+    return [calculate_average(attribute, start_sample, end_sample)
+                for attribute in attributes]
 
-    # Get actual throughput/s
-    sent_throughput = sent_difference / sample_time
-    recv_throughput = recv_difference / sample_time
+def get_network_throughput_avg(sample_time = 1, interface = None):
+    """
+    Get the average network throughput for a specified `sample_time`, results
+    in bytes/s.
 
-    return (sent_throughput, recv_throughput)
+    Will show results for all interfaces or for `interface`.
+
+    :returns: Tuple (bytes_out, bytes_in)
+    """
+
+    return _get_network_avg(('bytes_sent', 'bytes_recv'), sample_time, interface)
