@@ -1,0 +1,52 @@
+Stats Infrastructure/Design
+===========================
+
++-------------------------------+       +-------------------------------+
+|   server 01 (stats client)    |       |    server 02 (stats client)   |
++-------------------------------+       +-------------------------------+
+               |                                        |
+               |                                        |
+               +----------------+      +----------------+
+                                |      |
+                                V      V
+                           +----------------+
+                           |  Stats Server  |
+                           +----------------+
+                                |      |
+                                |      |
+               +----------------+      +----------------+
+               |                                        |
+               V                                        V
++-------------------------------+       +-------------------------------+               
+|  Websockets (Dashboard/Web)   |       |             Redis             |
++-------------------------------+       +-------------------------------+
+               |                                        |
+               |                                        |           
+       +-------+-------+                       +--------+-------+
+       |               |                       |                |
+       V               V                       V                V
+  +--------+      +--------+                +-----+         +-------+
+  | Client |      | Client |                | PHP |         | Other |                                                                     
+  +--------+      +--------+                +-----+         +-------+
+
+
+Stats Client
+============
+
+* Stat modules
+    * Module returns key-value dict
+
+* Module results stored in dictionary, format: { module-name: result }
+* Send results to stats server
+
+Stats Server
+============
+
+* Publish modules
+    * Store per-client results in Redis with format { client-module: data }
+    * Send client's data to listening websockets, encoded as json
+
+Dashboard
+=========
+
+Todo
