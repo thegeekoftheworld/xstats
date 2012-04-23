@@ -1,11 +1,16 @@
 import logging
 import gevent
 
+from gevent.event import Event
 from gevent.server import StreamServer
 from gevent.socket import create_connection
 from gevent.queue import Queue
+from gevent import socket
 
 logger = logging.getLogger(__name__)
+
+class DisconnectedException(Exception):
+    pass
 
 class Session(object):
     def __init__(self, socket = None, address = None):
@@ -14,6 +19,9 @@ class Session(object):
 
         self.recvGreenlet = None
         self.sendGreenlet = None
+        self.finished = Event()
+
+        self.cleanExit = False
 
         self.socket = socket
         self.address = address
@@ -27,9 +35,12 @@ class Session(object):
         self.log("Sent packet: {}".format(packet))
 
     def _sendLoop(self):
-        while True:
-            packet = self.sendQueue.get()
-            self._sendPacket(packet)
+        try:
+            while True:
+                packet = self.sendQueue.get()
+                self._sendPacket(packet)
+        except DisconnectedException:
+            self.log("_sendLoop killed")
 
     def send(self, packet):
         self.log("Sending packet: {}".format(packet))
@@ -52,12 +63,27 @@ class Session(object):
             self._recvPacket(packet)
 
         self.log("Socket disconnected")
+        self.onDisconnect()
 
     def start(self):
         self.log("Starting session loops")
 
-        self.recvGreenlet = gevent.spawn(self._sendLoop)
-        self.sendGreenlet = gevent.spawn(self._recvLoop)
+        self.recvGreenlet = gevent.spawn(self._recvLoop)
+        self.sendGreenlet = gevent.spawn(self._sendLoop)
+
+    def disconnect(self):
+        self.log("Disconnecting...")
+
+        self.cleanExit = True
+        self.socket.close()
+
+        self.finished.set()
+
+    def onDisconnect(self):
+        self.sendGreenlet.kill(DisconnectedException)
+
+        self.recvGreenlet = None
+        self.sendGreenlet = None
 
 class ServerSession(Session):
     def __init__(self, server, socket, address):
@@ -93,9 +119,24 @@ class Server(object):
             session.send(packet)
 
 class Client(Session):
+    retryInterval = 5
     def __init__(self, address):
         Session.__init__(self, address = address)
 
     def connect(self):
-        self.socket = create_connection(self.address, 2)
+        # Keep retrying the connection
+        while True:
+            try:
+                self.socket = create_connection(self.address, 2)
+                break
+            except socket.error as e:
+                self.log("Connect failed ({}), retrying in {} seconds".format(
+                    e, self.retryInterval
+                ))
+                gevent.sleep(self.retryInterval)
+
         self.start()
+
+    def _recvLoop(self):
+        Session._recvLoop(self)
+        self.connect()
