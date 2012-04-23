@@ -1,6 +1,8 @@
 import psutil
 import time
 
+from collections import deque
+
 def _get_network_avg(attributes, sample_time = 1, interface = None):
     """
     Get the average of a network related `attributes` for a
@@ -56,3 +58,14 @@ def get_network_throughput_avg(sample_time = 1, interface = None):
     """
 
     return _get_network_avg(('bytes_sent', 'bytes_recv'), sample_time, interface)
+
+def stream_network_throughput_rolling_avg(sample_num = 30, interval = 1, interface = None, callback = None):
+    samples = deque(maxlen = sample_num)
+    while True:
+        sample = get_network_throughput_avg(sample_time = interval, interface = interface)[0]
+        samples.append(sample)
+
+        average = sum(samples) / len(samples)
+
+        if callback:
+            callback(average)
