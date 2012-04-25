@@ -21,6 +21,7 @@ def main():
         aggregator.start(sys.argv[2])
 
     logger.debug("Exiting...")
+    return 0
 
 if __name__ == "__main__":
     exitCode = main()
