@@ -108,6 +108,8 @@ class ServerSession(Session):
         self.server.handleDisconnect(self)
 
 class Server(object):
+    session = ServerSession
+
     def __init__(self, port):
         self.port = port
         self.server = StreamServer(("0.0.0.0", port), self.handleConnect)
@@ -119,7 +121,7 @@ class Server(object):
         self.serverGreenlet = gevent.spawn(self.server.serve_forever)
 
     def handleConnect(self, socket, address):
-        session = Session(socket, address)
+        session = self.session(self, socket, address)
         session.start()
         self.sessions.add(session)
 
