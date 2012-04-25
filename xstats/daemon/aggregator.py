@@ -12,6 +12,8 @@ import network
 from bottle import run, get, Bottle
 from bottle.ext.websocket import GeventWebSocketServer, websocket
 
+from redis.exceptions import ConnectionError as RedisConnectionError
+
 logger = logging.getLogger(__name__)
 
 class Session(network.ServerSession):
@@ -74,7 +76,10 @@ class RedisModule(Module):
         self.port = port
         self.db   = db
 
+        self.disconnectedCache = {}
+
     def connect(self):
+        """Connect to a redis instance"""
         self.redis = redis.StrictRedis(host = self.host,
                                        port = self.port,
                                        db =   self.db)
@@ -82,8 +87,39 @@ class RedisModule(Module):
     def push(self, data):
         logger.debug("Setting {}".format(data))
 
-        redis_key = "{}-{}".format(data["host"], data["key"])
-        self.redis.set(redis_key, data["value"])
+        key   = "{}-{}".format(data["host"], data["key"])
+        value = data["value"]
+
+        try:
+            pipe = self.redis.pipeline()
+            pipe.set(key, value)
+
+            self.dump_cache(pipe)
+
+            pipe.execute()
+        except RedisConnectionError:
+            logger.debug("Connection failed...")
+
+            # Store in cache if failed
+            self.disconnectedCache[key] = value
+
+    def dump_cache(self, pipeline = None):
+        """
+        Try dumping the cache into redis if there's anything in it.
+
+        If this succeeds clear the cache.
+        """
+
+        target = pipeline if pipeline else self.redis
+
+        if len(self.disconnectedCache) > 0:
+            logger.debug("Dumping cache...")
+            for key, value in self.disconnectedCache.iteritems():
+                logger.debug("    {}: {}".format(key, value))
+                target.set(key, value)
+
+            # Clear cache
+            self.disconnectedCache = {}
 
 class Publisher(object):
     def __init__(self):
