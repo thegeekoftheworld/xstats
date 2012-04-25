@@ -32,9 +32,13 @@ class Session(object):
         getattr(logger, level)(string)
 
     def _sendPacket(self, packet):
-        self.log("Sending packet: {}".format(packet))
-        self.socket.sendall("{}\n".format(packet))
-        self.log("Sent packet: {}".format(packet))
+        try:
+            self.log("Sending packet: {}".format(packet))
+            self.socket.sendall("{}\n".format(packet))
+            self.log("Sent packet: {}".format(packet))
+        except socket.error as e:
+            self.log("Socket error: {}".format(e), 'error')
+            self.sendQueue.put(packet)
 
     def _sendLoop(self):
         self.log("Starting send loop...")
