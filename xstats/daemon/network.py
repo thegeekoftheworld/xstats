@@ -31,26 +31,34 @@ class Session(object):
         getattr(logger, level)(string)
 
     def _sendPacket(self, packet):
-        self.socket.sendall(packet)
+        self.log("Sending packet: {}".format(packet))
+        self.socket.sendall("{}\n".format(packet))
         self.log("Sent packet: {}".format(packet))
 
     def _sendLoop(self):
+        self.log("Starting send loop...")
+
         try:
             while True:
                 packet = self.sendQueue.get()
                 self._sendPacket(packet)
         except DisconnectedException:
             self.log("_sendLoop killed")
+        finally:
+            self.log("Send loop stopped")
 
     def send(self, packet):
-        self.log("Sending packet: {}".format(packet))
-        self.sendQueue.put("{}\n".format(packet))
+        self.log("Queueing packet: {}".format(packet))
+        self.sendQueue.put(packet)
 
     def _recvPacket(self, packet):
+        packet = packet[:-1] # Remove trailing newline
+
         self.log("Packet received: {}".format(packet))
-        pass
+        self.recvQueue.put(packet)
 
     def _recvLoop(self):
+        self.log("Starting recv loop...")
         sockfile = self.socket.makefile()
 
         while True:
@@ -64,6 +72,7 @@ class Session(object):
 
         self.log("Socket disconnected")
         self.onDisconnect()
+        self.log("Recv loop stopped")
 
     def start(self):
         self.log("Starting session loops")
