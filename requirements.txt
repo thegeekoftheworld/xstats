@@ -1,0 +1,10 @@
+bottle==0.10.9
+bottle-websocket==0.2
+gevent==0.13.7
+gevent-websocket==0.3.6
+greenlet==0.3.4
+psutil==0.4.1
+redis==2.4.11
+ujson==1.18
+wsgiref==0.1.2
+-e git+xgit:xstats@HEAD#egg=xstats-dev
