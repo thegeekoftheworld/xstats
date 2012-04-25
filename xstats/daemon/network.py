@@ -101,7 +101,7 @@ class ServerSession(Session):
     def __init__(self, server, socket, address):
         self.server = server
 
-        Session.__init__(socket, address)
+        Session.__init__(self, socket, address)
 
     def _recvLoop(self):
         Session._recvLoop(self)
