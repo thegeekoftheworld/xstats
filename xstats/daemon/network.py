@@ -13,8 +13,9 @@ class DisconnectedException(Exception):
     pass
 
 class Session(object):
+    packetHandler = None
+
     def __init__(self, socket = None, address = None):
-        self.recvQueue = Queue()
         self.sendQueue = Queue()
 
         self.recvGreenlet = None
@@ -55,7 +56,9 @@ class Session(object):
         packet = packet[:-1] # Remove trailing newline
 
         self.log("Packet received: {}".format(packet))
-        self.recvQueue.put(packet)
+
+        if self.packetHandler:
+            self.packetHandler(packet)
 
     def _recvLoop(self):
         self.log("Starting recv loop...")
