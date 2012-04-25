@@ -48,11 +48,11 @@ class Publisher(object):
 
 def send_publish_socket(key, value, client, additional = {}):
     packet = {
-        key: value
+        "key"  : key,
+        "value": value
     }
 
     packet.update(additional)
-
     client.send(ujson.dumps(packet))
 
 def start(address, hostname = socket.gethostname()):
