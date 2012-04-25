@@ -4,32 +4,28 @@ import logging
 
 from xstats.daemon import reporter, aggregator
 
-FORMAT = '%(asctime)-15s %(message)s'
+FORMAT = '[%(asctime)-15s] [%(name)s] %(message)s'
 logging.basicConfig(format=FORMAT, level = logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
 def main():
-    if len(sys.argv) < 2:
-        print "Syntax: ./xstats server <port>"
-        print "                 client <address> <port>"
+    if len(sys.argv) < 2 or sys.argv[1] not in ('client', 'server'):
         return 1
 
+    logger.debug("Starting %s..." % sys.argv[1])
+
     if sys.argv[1] == "client":
-        try:
-            logger.debug("Starting reporter...")
-            client = reporter.start(sys.argv[2:])
-            logger.debug("Joining greenlet...")
-            client.finished.wait()
-            logger.debug("Exiting...")
-        except KeyboardInterrupt:
-            client.disconnect()
-            client.finished.wait()
+        reporter.start(sys.argv[2:])
     elif sys.argv[1] == "server":
-        server = aggregator.start(sys.argv[2])
-        logger.debug("Join greenlet...")
-        server.serverGreenlet.join()
-        logger.debug("Exiting...")
+        aggregator.start(sys.argv[2])
+
+    logger.debug("Exiting...")
 
 if __name__ == "__main__":
-    sys.exit(main())
+    exitCode = main()
+    if exitCode != 0:
+        print "Syntax: ./xstats server <port>"
+        print "                 client <address> <port>"
+
+    sys.exit(exitCode)
