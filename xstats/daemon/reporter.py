@@ -32,8 +32,6 @@ class NetworkModule(Module):
         self.publish("network-average", average)
 
 class Publisher(object):
-    interval = 1
-
     def __init__(self, target):
         self.target = target
         self.modules = []
