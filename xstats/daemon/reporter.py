@@ -57,14 +57,23 @@ def send_publish_socket(key, value, client, additional = {}):
 
 def start(address, hostname = socket.gethostname()):
     client = Client(address)
+
+    # Create target function
     target = functools.partial(send_publish_socket, additional = {
         "host": hostname
     }, client = client)
-    publisher = Publisher(target)
 
+    # Initialize the publisher
+    publisher = Publisher(target)
     publisher.loadModule(NetworkModule)
 
+    # Start client and publisher
     client.connect()
     publisher.start()
 
-    return client
+    # Wait until client finishes
+    try:
+        client.finished.wait()
+    except KeyboardInterrupt:
+        client.disconnect()
+        client.finished.wait()

@@ -1,8 +1,11 @@
+from gevent import monkey; monkey.patch_socket()
+
 import logging
 import functools
 
 import ujson
 import gevent
+import redis
 
 import network
 
@@ -65,6 +68,23 @@ class WebsocketModule(Module):
         for client in self.clients:
             client.send(ujson.dumps(data))
 
+class RedisModule(Module):
+    def __init__(self, host='127.0.0.1', port = 6379, db = 0):
+        self.host = host
+        self.port = port
+        self.db   = db
+
+    def connect(self):
+        self.redis = redis.StrictRedis(host = self.host,
+                                       port = self.port,
+                                       db =   self.db)
+
+    def push(self, data):
+        logger.debug("Setting {}".format(data))
+
+        redis_key = "{}-{}".format(data["host"], data["key"])
+        self.redis.set(redis_key, data["value"])
+
 class Publisher(object):
     def __init__(self):
         self.modules = []
@@ -84,12 +104,17 @@ def start(port = 13337):
     websocketModule = WebsocketModule()
     websocketModule.listen()
 
+    redisModule = RedisModule()
+    redisModule.connect()
+
     publisher = Publisher()
     publisher.addModule(websocketModule)
+    publisher.addModule(redisModule)
 
     server = Server(13337, publisher)
 
     server.listen()
     logger.debug("Start listening...")
 
-    return server
+    # Wait for the server to finish up
+    server.serverGreenlet.join()
