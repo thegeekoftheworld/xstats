@@ -1,0 +1,31 @@
+#!/bin/env python
+
+import sys
+import logging
+
+from xstats.daemon.network import Server
+from xstats.daemon.reporter import start
+
+FORMAT = '%(asctime)-15s %(message)s'
+logging.basicConfig(format=FORMAT, level = logging.DEBUG)
+
+logger = logging.getLogger(__name__)
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "client":
+        try:
+            logger.debug("Starting reporter...")
+            client = start(sys.argv[2:])
+            logger.debug("Joining greenlet...")
+            client.finished.wait()
+            logger.debug("Exiting...")
+        except KeyboardInterrupt:
+            client.disconnect()
+            client.finished.wait()
+    else:
+        server = Server(13337)
+        logger.debug("Start listening...")
+        server.listen()
+        logger.debug("Join greenlet...")
+        server.serverGreenlet.join()
+        logger.debug("Exiting...")
