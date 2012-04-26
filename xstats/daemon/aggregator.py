@@ -1,6 +1,5 @@
 from gevent import monkey; monkey.patch_socket()
 
-import logging
 import functools
 
 import ujson
@@ -14,7 +13,7 @@ from bottle.ext.websocket import GeventWebSocketServer, websocket
 
 from redis.exceptions import ConnectionError as RedisConnectionError
 
-logger = logging.getLogger(__name__)
+from twiggy import log; logger = log.name(__name__)
 
 class Session(network.ServerSession):
     def __init__(self, server, socket, address, publisher):
@@ -41,6 +40,9 @@ class WebsocketModule(Module):
         self.clients = set()
         self.app     = Bottle()
 
+        self.log = logger.name("websocket") \
+                         .fields(host = host, port = port)
+
         @self.app.get('/stats', apply=[websocket])
         def stats(ws):
             self.clients.add(ws)
@@ -56,16 +58,14 @@ class WebsocketModule(Module):
         gevent.spawn(self._start)
 
     def _start(self):
-        logger.debug(
-            "Starting websocket server on {}:{}".format(self.host, self.port)
-        )
         run(self.app, host = self.host,
                       port = self.port,
                       server = GeventWebSocketServer)
+        self.log.debug("Started server at {}:{}", self.host, self.port)
 
 
     def push(self, data):
-        logger.debug("Pushing {}".format(data))
+        self.log.debug("Pushing {}", data)
 
         for client in self.clients:
             client.send(ujson.dumps(data))
@@ -78,6 +78,9 @@ class RedisModule(Module):
 
         self.disconnectedCache = {}
 
+        self.log = logger.name("redis") \
+                         .fields(host = host, port = port, db = db)
+
     def connect(self):
         """Connect to a redis instance"""
         self.redis = redis.StrictRedis(host = self.host,
@@ -85,7 +88,7 @@ class RedisModule(Module):
                                        db =   self.db)
 
     def push(self, data):
-        logger.debug("Setting {}".format(data))
+        self.log.debug("Setting {}", data)
 
         key   = "{}-{}".format(data["host"], data["key"])
         value = data["value"]
@@ -98,7 +101,7 @@ class RedisModule(Module):
 
             pipe.execute()
         except RedisConnectionError:
-            logger.debug("Connection failed...")
+            self.log.debug("Connection failed...")
 
             # Store in cache if failed
             self.disconnectedCache[key] = value
@@ -113,9 +116,9 @@ class RedisModule(Module):
         target = pipeline if pipeline else self.redis
 
         if len(self.disconnectedCache) > 0:
-            logger.debug("Dumping cache...")
+            self.log.debug("Dumping cache...")
             for key, value in self.disconnectedCache.iteritems():
-                logger.debug("    {}: {}".format(key, value))
+                self.log.debug("    {}: {}", key, value)
                 target.set(key, value)
 
             # Clear cache

@@ -1,4 +1,3 @@
-import logging
 import gevent
 
 from gevent.event import Event
@@ -7,7 +6,7 @@ from gevent.socket import create_connection
 from gevent.queue import Queue
 from gevent import socket
 
-logger = logging.getLogger(__name__)
+from twiggy import log; logger = log.name(__name__)
 
 class DisconnectedException(Exception):
     pass
@@ -27,45 +26,44 @@ class Session(object):
         self.socket = socket
         self.address = address
 
-    def log(self, string, level = 'debug'):
-        string = "[%s:%s] %s" % (self.address[0], self.address[1], string)
-        getattr(logger, level)(string)
+        self.log = logger.name("session") \
+                         .fields(host = address[0], port = address[1])
 
     def _sendPacket(self, packet):
         try:
-            self.log("Sending packet: {}".format(packet))
+            self.log.debug("Sending packet: {}", packet)
             self.socket.sendall("{}\n".format(packet))
-            self.log("Sent packet: {}".format(packet))
+            self.log.debug("Sent packet: {}", packet)
         except socket.error as e:
-            self.log("Socket error: {}".format(e), 'error')
+            self.log.error("Socket error: {}", e)
             self.sendQueue.put(packet)
 
     def _sendLoop(self):
-        self.log("Starting send loop...")
+        self.log.debug("Starting send loop...")
 
         try:
             while True:
                 packet = self.sendQueue.get()
                 self._sendPacket(packet)
         except DisconnectedException:
-            self.log("_sendLoop killed")
+            self.log.debug("_sendLoop killed")
         finally:
-            self.log("Send loop stopped")
+            self.log.debug("Send loop stopped")
 
     def send(self, packet):
-        self.log("Queueing packet: {}".format(packet))
+        self.log.debug("Queueing packet: {}", packet)
         self.sendQueue.put(packet)
 
     def _recvPacket(self, packet):
         packet = packet[:-1] # Remove trailing newline
 
-        self.log("Packet received: {}".format(packet))
+        self.log.debug("Packet received: {}", packet)
 
         if self.packetHandler:
             self.packetHandler(packet)
 
     def _recvLoop(self):
-        self.log("Starting recv loop...")
+        self.log.debug("Starting recv loop...")
         sockfile = self.socket.makefile()
 
         while True:
@@ -77,18 +75,18 @@ class Session(object):
 
             self._recvPacket(packet)
 
-        self.log("Socket disconnected")
+        self.log.debug("Socket disconnected")
         self.onDisconnect()
-        self.log("Recv loop stopped")
+        self.log.debug("Recv loop stopped")
 
     def start(self):
-        self.log("Starting session loops")
+        self.log.debug("Starting session loops")
 
         self.recvGreenlet = gevent.spawn(self._recvLoop)
         self.sendGreenlet = gevent.spawn(self._sendLoop)
 
     def disconnect(self):
-        self.log("Disconnecting...")
+        self.log.debug("Disconnecting...")
 
         self.cleanExit = True
         self.socket.close()
@@ -148,9 +146,9 @@ class Client(Session):
                 self.socket = create_connection(self.address, 2)
                 break
             except socket.error as e:
-                self.log("Connect failed ({}), retrying in {} seconds".format(
+                self.log.debug("Connect failed ({}), retrying in {} seconds",
                     e, self.retryInterval
-                ))
+                )
                 gevent.sleep(self.retryInterval)
 
         self.start()

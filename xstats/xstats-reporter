@@ -1,11 +1,10 @@
 #!/bin/env python
 import argparse
-import logging
 
 from xstats.daemon import reporter
 from xstats.daemon.shared import setup_logging; setup_logging()
 
-logger = logging.getLogger(__name__)
+from twiggy import log; logger = log.name(__name__)
 
 def main():
     parser = argparse.ArgumentParser(description = "xStats Reporter")

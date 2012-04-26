@@ -10,6 +10,8 @@ from network import Client
 
 from xstats.net import stream_network_throughput_rolling_avg
 
+from twiggy import log; logger = log.name(__name__)
+
 class Module(object):
     def __init__(self, publisher):
         self.publisher = publisher
