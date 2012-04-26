@@ -115,16 +115,13 @@ class RedisModule(Module):
         self.port = port
         self.db   = db
 
+        # Setup the redis API
+        self.redis = redis.StrictRedis(host = host, port = port, db = db)
+
         self.disconnectedCache = {}
 
         self.log = logger.name("redis") \
                          .fields(host = host, port = port, db = db)
-
-    def connect(self):
-        """Connect to a redis instance"""
-        self.redis = redis.StrictRedis(host = self.host,
-                                       port = self.port,
-                                       db =   self.db)
 
     def push(self, data):
         """
@@ -200,7 +197,6 @@ def start(port = 13337):
 
     # Setup redis module
     redisModule = RedisModule()
-    redisModule.connect()
 
     # Setup publisher
     publisher = Publisher()
