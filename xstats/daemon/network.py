@@ -59,7 +59,7 @@ class Session(object):
             self.log.debug("Sent packet: {}", packet)
         except socket.error as e:
             # If an error occurs put packet back on the queue
-            self.log.error("Socket error: {}", e)
+            self.log.error("_sendPacket error: {}", e)
             self.disconnect()
             self.sendQueue.put(packet)
             return False
@@ -117,6 +117,7 @@ class Session(object):
                 packet = sockfile.readline()
             except socket.error as e:
                 self.log.error("_recvLoop, exception: {}", e)
+                self.disconnect()
                 break
 
             # Stop if packet is None
