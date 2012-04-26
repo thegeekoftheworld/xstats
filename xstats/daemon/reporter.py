@@ -2,6 +2,8 @@ from gevent import monkey; monkey.patch_time()
 
 import functools
 import socket
+import time
+from datetime import datetime
 
 import ujson
 import gevent
@@ -11,6 +13,10 @@ from network import Client
 from xstats.net import stream_network_throughput_rolling_avg
 
 from twiggy import log; logger = log.name(__name__)
+
+def utc_unix_timestamp():
+    """Return a unix timestamp based on UTC, in seconds"""
+    return int(time.mktime(datetime.utcnow().timetuple()))
 
 class Module(object):
     """Base for statistics gatherering modules"""
@@ -78,8 +84,9 @@ def send_publish_socket(key, value, client, additional = {}):
     :additional: additional key/value pairs to send along
     """
     packet = {
-        "key"  : key,
-        "value": value
+        "key"      : key,
+        "value"    : value,
+        "timestamp": utc_unix_timestamp()
     }
 
     packet.update(additional)
