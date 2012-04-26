@@ -54,16 +54,16 @@ class Module(object):
     def publishMulti(self, data):
         self.publisher.publish(self.name, data)
 
-class NetworkModule(Module):
-    """Reports network statistics, bandwidth usage up/down, packet/s, etc."""
+class BandwidthRollingAvgModule(Module):
+    """Reports bandwidth rolling average."""
 
-    name = "net"
+    name = "BwRollingAvg"
 
     def __init__(self, interface = None):
         """
-        Initialize NetworModule
+        Initialize BandwidthRollingAvgModule
 
-        :interface: Interface to gather statistics from
+        :interface: Interface, combined if None, specific interface if string.
         """
 
         self.interface = interface
@@ -78,7 +78,10 @@ class NetworkModule(Module):
         interface = "all" if not self.interface else self.interface
         keyName   = "average-{}".format(interface)
 
-        self.publishSingle(keyName, average)
+        self.publishMulti({
+            "{}-out".format(keyName): average[0],
+            "{}-in".format(keyName): average[1],
+        })
 
 class Publisher(BasePublisher):
     def __init__(self, target):

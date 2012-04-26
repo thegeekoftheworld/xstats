@@ -65,16 +65,20 @@ def stream_network_throughput_rolling_avg(sample_num = 30, interval = 1, interfa
 
     :sample_num: Number of samples to average over
     :interval:   Interval between samples
-    :interface:  Interface to monitor, None for all
+    :interface: Interface, combined if None, specific interface if string.
     :callback:   Callable to invoke every tick with the result
     """
 
-    samples = deque(maxlen = sample_num)
+    samples = (
+        deque(maxlen = sample_num),
+        deque(maxlen = sample_num)
+    )
     while True:
-        sample = get_network_throughput_avg(sample_time = interval, interface = interface)[0]
-        samples.append(sample)
+        for i in xrange(0, 2):
+            sample = get_network_throughput_avg(sample_time = interval, interface = interface)[i]
+            samples[i].append(sample)
 
-        average = sum(samples) / len(samples)
+        averages = map(lambda sampleDeque: (sum(sampleDeque) / len(sampleDeque)), samples)
 
         if callback:
-            callback(average)
+            callback(averages)
