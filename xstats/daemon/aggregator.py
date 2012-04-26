@@ -44,7 +44,7 @@ class Module(object):
         """
         Called to push new data
 
-        :data: The data to push
+        :data: Contains the packet data
         """
         pass
 
@@ -131,18 +131,17 @@ class RedisModule(Module):
         :data: Data to push
         """
 
-        key   = "{}-{}".format(data["host"], data["key"])
-        value = data["value"]
+        for key, value in data["packet"].iteritems():
+            self.pushSingle(data["host"], key, value)
 
-        self.log.debug("Setting {}: {}", key, value)
+    def pushSingle(self, hostname, key, value):
+        fullKey   = "{}-{}".format(hostname, key)
+
+        self.log.debug("Setting {}:{}", fullKey, value)
 
         try:
-            pipe = self.redis.pipeline()
-            pipe.set(key, value)
-
-            self.dump_cache(pipe)
-
-            pipe.execute()
+            self.redis.set(fullKey, value)
+            self.dump_cache()
         except RedisConnectionError:
             self.log.error("Connection failed...")
 
@@ -158,7 +157,7 @@ class RedisModule(Module):
         :pipeline: Use this pipeline for all commands, if None don't pipeline
         """
 
-        target = pipeline if pipeline else self.redis
+        target = self.redis.pipeline()
 
         # If there's a cache, dump it into redis
         if len(self.disconnectedCache) > 0:

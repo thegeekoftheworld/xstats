@@ -40,7 +40,7 @@ class Module(object):
         """This will run in a separate greenlet"""
         pass
 
-    def publish(self, key, value):
+    def publishSingle(self, key, value):
         """
         Call the publisher with the data
 
@@ -48,7 +48,10 @@ class Module(object):
         :value: Value of the statistic
         """
 
-        self.publisher.publish(key, value)
+        self.publisher.publish({key: value})
+
+    def publishMulti(self, data):
+        self.publisher.publish(data)
 
 class NetworkModule(Module):
     """Reports network statistics, bandwidth usage up/down, packet/s, etc."""
@@ -57,7 +60,7 @@ class NetworkModule(Module):
         stream_network_throughput_rolling_avg(callback = self.callback)
 
     def callback(self, average):
-        self.publish("network-average", average)
+        self.publishSingle("network-average", average)
 
 class Publisher(object):
     def __init__(self, target):
@@ -67,25 +70,25 @@ class Publisher(object):
     def loadModule(self, moduleClass):
         self.modules.append(moduleClass(self))
 
-    def publish(self, key, value):
-        self.target(key, value)
+    def publish(self, data):
+        self.target(data)
 
     def start(self):
         for module in self.modules:
             module.start()
 
-def send_publish_socket(key, value, client, additional = {}):
+def send_publish_socket(packet_data, client, additional = {}):
     """
     Function that is used by the publisher to send its data.
 
-    :key:        Key to send
-    :value:      Value to send
-    :client:     `Client` object to use to send the data
-    :additional: additional key/value pairs to send along
+    :packet_data: Data to send
+    :value:       Value to send
+    :client:      `Client` object to use to send the data
+    :additional:  additional key/value pairs to send along
     """
+
     packet = {
-        "key"      : key,
-        "value"    : value,
+        "packet"   : packet_data,
         "timestamp": utc_unix_timestamp()
     }
 
