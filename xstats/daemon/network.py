@@ -47,7 +47,11 @@ class Session(object):
                          .fields(host = address[0], port = address[1])
 
     def _sendPacket(self, packet):
-        """Send a packet, writing it to the socket"""
+        """
+        Send a packet, writing it to the socket
+
+        `_sendLoop` will stop if this does not return True
+        """
 
         try:
             self.log.debug("Sending packet: {}", packet)
@@ -58,6 +62,9 @@ class Session(object):
             self.log.error("Socket error: {}", e)
             self.disconnect()
             self.sendQueue.put(packet)
+            return False
+
+        return True
 
     def _sendLoop(self):
         """Loop for sending packets"""
@@ -67,7 +74,8 @@ class Session(object):
         try:
             while True:
                 packet = self.sendQueue.get()
-                self._sendPacket(packet)
+                if not self._sendPacket(packet):
+                    break
         except DisconnectedException:
             self.log.debug("_sendLoop killed")
         finally:
