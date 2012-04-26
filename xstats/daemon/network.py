@@ -116,7 +116,7 @@ class Session(object):
         # Only error level if not clean exit
         if not self.cleanExit:
             self.log.error("Connection lost")
-        else
+        else:
             self.log.debug("Socket disconnected")
 
         self.onDisconnect()
