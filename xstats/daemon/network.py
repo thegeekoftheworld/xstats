@@ -113,7 +113,11 @@ class Session(object):
         sockfile = self.socket.makefile()
 
         while True:
-            packet = sockfile.readline()
+            try:
+                packet = sockfile.readline()
+            except socket.error as e:
+                self.log.error("_recvLoop, exception: {}", e)
+                break
 
             # Stop if packet is None
             if not packet:
