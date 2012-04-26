@@ -17,6 +17,7 @@ from twiggy import log; logger = log.name(__name__)
 
 class Session(network.ServerSession):
     def __init__(self, server, socket, address, publisher):
+        # Stitch the publisher's `parse` method to this as the packet handler
         self.packetHandler = publisher.parse
 
         network.ServerSession.__init__(self, server, socket, address)
@@ -24,16 +25,38 @@ class Session(network.ServerSession):
 
 class Server(network.Server):
     def __init__(self, port, publisher):
+        """
+        :publisher: Publisher to push data to
+
+        for more info see `xstats.daemon.network.Server`
+        """
+
+        # Use our custom `Session` object as session factory,
+        # pass in `publisher` as default argument
         self.session = functools.partial(Session, publisher = publisher)
 
         network.Server.__init__(self, port)
 
 class Module(object):
+    """Base for publisher modules"""
+
     def push(self, data):
+        """
+        Called to push new data
+
+        :data: The data to push
+        """
         pass
 
 class WebsocketModule(Module):
     def __init__(self, host = '127.0.0.1', port = 8080):
+        """
+        Initialize websocket module
+
+        :host: Host(IP) to listen on
+        :port: Port to listen on
+        """
+
         self.host = host
         self.port = port
 
@@ -45,19 +68,25 @@ class WebsocketModule(Module):
 
         @self.app.get('/stats', apply=[websocket])
         def stats(ws):
+            # Add the client
             self.clients.add(ws)
 
+            # Start socket loop
             while True:
                 msg = ws.receive()
                 if msg is None:
                     break
 
+            # Connection closed, remove client
             self.clients.remove(ws)
 
     def listen(self):
+        """Spawn the bottle webserver in a greenlet"""
         gevent.spawn(self._start)
 
     def _start(self):
+        """Run the websocket bottle app"""
+
         run(self.app, host = self.host,
                       port = self.port,
                       server = GeventWebSocketServer)
@@ -65,6 +94,8 @@ class WebsocketModule(Module):
 
 
     def push(self, data):
+        """Push data to all websocket clients that are connected"""
+
         self.log.debug("Pushing {}", data)
 
         for client in self.clients:
@@ -72,6 +103,14 @@ class WebsocketModule(Module):
 
 class RedisModule(Module):
     def __init__(self, host='127.0.0.1', port = 6379, db = 0):
+        """
+        Initialize the redis module
+
+        :host: Host that redis is running on
+        :port: Port to connect to
+        :db:   Id of the DB to use
+        """
+
         self.host = host
         self.port = port
         self.db   = db
@@ -88,7 +127,12 @@ class RedisModule(Module):
                                        db =   self.db)
 
     def push(self, data):
-        self.log.debug("Setting {}", data)
+        """
+        Push data to redis, if a connection can't be established store the data
+        in the cache until we can successfully connect.
+
+        :data: Data to push
+        """
 
         key   = "{}-{}".format(data["host"], data["key"])
         value = data["value"]
@@ -111,12 +155,16 @@ class RedisModule(Module):
         Try dumping the cache into redis if there's anything in it.
 
         If this succeeds clear the cache.
+
+        :pipeline: Use this pipeline for all commands, if None don't pipeline
         """
 
         target = pipeline if pipeline else self.redis
 
+        # If there's a cache, dump it into redis
         if len(self.disconnectedCache) > 0:
             self.log.debug("Dumping cache...")
+
             for key, value in self.disconnectedCache.iteritems():
                 self.log.debug("    {}: {}", key, value)
                 target.set(key, value)
@@ -140,16 +188,26 @@ class Publisher(object):
         self.publish(data)
 
 def start(port = 13337):
+    """
+    Starts the aggregator
+
+    :port: Port to listen on for reporters
+    """
+
+    # Setup websocket module
     websocketModule = WebsocketModule()
     websocketModule.listen()
 
+    # Setup redis module
     redisModule = RedisModule()
     redisModule.connect()
 
+    # Setup publisher
     publisher = Publisher()
     publisher.addModule(websocketModule)
     publisher.addModule(redisModule)
 
+    # Create server
     server = Server(13337, publisher)
 
     server.listen()

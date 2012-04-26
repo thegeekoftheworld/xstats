@@ -60,6 +60,15 @@ def get_network_throughput_avg(sample_time = 1, interface = None):
     return _get_network_avg(('bytes_sent', 'bytes_recv'), sample_time, interface)
 
 def stream_network_throughput_rolling_avg(sample_num = 30, interval = 1, interface = None, callback = None):
+    """
+    Stream a rolling network average by calling :callback: every tick
+
+    :sample_num: Number of samples to average over
+    :interval:   Interval between samples
+    :interface:  Interface to monitor, None for all
+    :callback:   Callable to invoke every tick with the result
+    """
+
     samples = deque(maxlen = sample_num)
     while True:
         sample = get_network_throughput_avg(sample_time = interval, interface = interface)[0]
