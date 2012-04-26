@@ -13,6 +13,13 @@ def setup_logging():
     quickSetup()
 
 def parseConfig(filename, defaults = None):
+    """
+    Parse a config file, including support for defaults
+
+    :filename: File to parse
+    :defaults: Default values
+    """
+
     result = defaults.copy() if defaults else {}
 
     configText = open(filename).read()
@@ -22,6 +29,13 @@ def parseConfig(filename, defaults = None):
     return result
 
 def loadModulesFromConfig(config, host, finder):
+    """
+    Load modules based on the `config` dictionary, instantiating them and
+    calling the `addModule` method of `host` to register them.
+
+    Uses the `finder` callable to get a valid Class back.
+    """
+
     # Loop through all modules
     for moduleName, moduleConfigs in config["modules"].iteritems():
 
