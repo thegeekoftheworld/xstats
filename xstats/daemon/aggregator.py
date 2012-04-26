@@ -134,6 +134,8 @@ class RedisModule(Module):
         key   = "{}-{}".format(data["host"], data["key"])
         value = data["value"]
 
+        self.log.debug("Setting {}: {}", key, value)
+
         try:
             pipe = self.redis.pipeline()
             pipe.set(key, value)
