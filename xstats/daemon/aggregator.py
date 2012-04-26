@@ -135,7 +135,25 @@ class RedisModule(Module):
 
         self.log.debug("Setting {}:{}", keyName, packet["data"])
 
-        self.redis.hmset(keyName, packet["data"])
+        try:
+            self.redis.hmset(keyName, packet["data"])
+            self.flushCache()
+        except RedisConnectionError:
+            self.log.warning("Can't connect to Redis, caching '{}'", keyName)
+            self.disconnectedCache[keyName] = packet["data"]
+
+    def flushCache(self):
+        if len(self.disconnectedCache) == 0:
+            return
+
+        self.log.info("Flushing cache...")
+
+        pipeline = self.redis.pipeline()
+        for key, data in self.disconnectedCache.iteritems():
+            self.log.debug(" * Flushing {}", key)
+            pipeline.hmset(key, data)
+
+        self.disconnectedCache = {}
 
 class Publisher(object):
     def __init__(self):
