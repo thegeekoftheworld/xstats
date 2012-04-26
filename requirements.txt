@@ -1,3 +1,5 @@
+PyYAML==3.10
+Twiggy==0.4.4
 bottle==0.10.9
 bottle-websocket==0.2
 gevent==0.13.7
