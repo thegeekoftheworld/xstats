@@ -244,6 +244,9 @@ class Client(Session):
     def connect(self):
         """Connect to a server"""
 
+        # Reset `cleanExit`
+        self.cleanExit = False
+
         # Keep retrying the connection
         while True:
             try:
