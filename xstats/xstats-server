@@ -15,9 +15,9 @@ def main():
 
     args = parser.parse_args()
 
-    logger.debug("Starting xStats Server...")
+    logger.info("Starting xStats Server...")
     aggregator.start(args.port)
-    logger.debug("Exiting...")
+    logger.info("Exiting...")
 
 if __name__ == "__main__":
     main()

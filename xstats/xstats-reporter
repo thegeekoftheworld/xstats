@@ -18,9 +18,9 @@ def main():
 
     args = parser.parse_args()
 
-    logger.debug("Starting xStats Reporter")
+    logger.info("Starting xStats Reporter")
     reporter.start((args.host, args.port))
-    logger.debug("Exiting...")
+    logger.info("Exiting...")
 
 if __name__ == "__main__":
     main()

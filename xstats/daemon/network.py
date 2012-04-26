@@ -112,7 +112,12 @@ class Session(object):
 
             self._recvPacket(packet)
 
-        self.log.debug("Socket disconnected")
+        # Only error level if not clean exit
+        if not self.cleanExit:
+            self.log.error("Connection lost")
+        else
+            self.log.debug("Socket disconnected")
+
         self.onDisconnect()
         self.log.debug("Recv loop stopped")
 
@@ -187,10 +192,14 @@ class Server(object):
 
         self.sessions = set()
 
+        self.log = logger.name("server") \
+                         .fields(port = port)
+
     def listen(self):
         """Start listening"""
 
         self.serverGreenlet = gevent.spawn(self.server.serve_forever)
+        self.log.info("Started listening on port {}", self.port)
 
     def handleConnect(self, socket, address):
         """
@@ -199,6 +208,8 @@ class Server(object):
         :socket: Socket object for the connection
         :address: (ip, port) tuple of the remote client
         """
+
+        self.log.info("Client connected from {}:{}", address[0], address[1])
 
         session = self.session(self, socket, address)
         session.start()

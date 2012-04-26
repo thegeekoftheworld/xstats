@@ -144,7 +144,7 @@ class RedisModule(Module):
 
             pipe.execute()
         except RedisConnectionError:
-            self.log.debug("Connection failed...")
+            self.log.error("Connection failed...")
 
             # Store in cache if failed
             self.disconnectedCache[key] = value
@@ -162,7 +162,7 @@ class RedisModule(Module):
 
         # If there's a cache, dump it into redis
         if len(self.disconnectedCache) > 0:
-            self.log.debug("Dumping cache...")
+            self.log.info("Dumping cache...")
 
             for key, value in self.disconnectedCache.iteritems():
                 self.log.debug("    {}: {}", key, value)
@@ -207,9 +207,7 @@ def start(port = 13337):
 
     # Create server
     server = Server(13337, publisher)
-
     server.listen()
-    logger.debug("Start listening...")
 
     # Wait for the server to finish up
     server.serverGreenlet.join()
