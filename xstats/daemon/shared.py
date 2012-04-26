@@ -50,3 +50,14 @@ def loadModulesFromConfig(config, host, finder):
 
             # Add to module host
             host.addModule(module)
+
+class BasePublisher(object):
+    def __init__(self):
+        self.modules = []
+
+    def start(self):
+        for module in self.modules:
+            module.start()
+
+    def addModule(self, module):
+        self.modules.append(module)

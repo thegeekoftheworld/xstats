@@ -14,7 +14,7 @@ from bottle.ext.websocket import GeventWebSocketServer, websocket
 
 from redis.exceptions import ConnectionError as RedisConnectionError
 
-from shared import parseConfig, loadModulesFromConfig
+from shared import parseConfig, loadModulesFromConfig, BasePublisher
 
 from twiggy import log; logger = log.name(__name__)
 
@@ -171,13 +171,7 @@ class RedisModule(Module):
 
         self.disconnectedCache = {}
 
-class Publisher(object):
-    def __init__(self):
-        self.modules = []
-
-    def addModule(self, module):
-        self.modules.append(module)
-
+class Publisher(BasePublisher):
     def publish(self, data):
         for module in self.modules:
             module.push(data)
@@ -185,10 +179,6 @@ class Publisher(object):
     def parse(self, packet):
         data = ujson.loads(packet)
         self.publish(data)
-
-    def start(self):
-        for module in self.modules:
-            module.start()
 
 def moduleFinder(name):
     moduleName = "{}Module".format(name)

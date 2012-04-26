@@ -14,7 +14,7 @@ from network import Client
 
 from xstats.net import stream_network_throughput_rolling_avg
 
-from shared import parseConfig, loadModulesFromConfig
+from shared import parseConfig, loadModulesFromConfig, BasePublisher
 
 from twiggy import log; logger = log.name(__name__)
 
@@ -80,21 +80,19 @@ class NetworkModule(Module):
 
         self.publishSingle(keyName, average)
 
-class Publisher(object):
+class Publisher(BasePublisher):
     def __init__(self, target):
         self.target = target
-        self.modules = []
+
+        BasePublisher.__init__(self)
 
     def addModule(self, module):
-        self.modules.append(module)
         module.publisher = self
+
+        BasePublisher.addModule(self, module)
 
     def publish(self, moduleName, data):
         self.target(moduleName, data)
-
-    def start(self):
-        for module in self.modules:
-            module.start()
 
 def send_publish_socket(moduleName, packetData, client, additional = {}):
     """
