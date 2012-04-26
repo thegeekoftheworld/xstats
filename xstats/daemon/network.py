@@ -56,6 +56,7 @@ class Session(object):
         except socket.error as e:
             # If an error occurs put packet back on the queue
             self.log.error("Socket error: {}", e)
+            self.disconnect()
             self.sendQueue.put(packet)
 
     def _sendLoop(self):
