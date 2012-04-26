@@ -12,11 +12,14 @@ def main():
                         type    = int,
                         default = 13337,
                         help    = "Port to listen on")
+    parser.add_argument("--config", "-c",
+                        dest    = 'configFile',
+                        help    = "Config file to use")
 
     args = parser.parse_args()
 
     logger.info("Starting xStats Server...")
-    aggregator.start(args.port)
+    aggregator.start(args)
     logger.info("Exiting...")
 
 if __name__ == "__main__":

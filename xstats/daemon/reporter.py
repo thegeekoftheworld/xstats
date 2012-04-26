@@ -3,6 +3,8 @@ from gevent import monkey; monkey.patch_time()
 import functools
 import socket
 import time
+import sys
+
 from datetime import datetime
 
 import ujson
@@ -11,6 +13,8 @@ import gevent
 from network import Client
 
 from xstats.net import stream_network_throughput_rolling_avg
+
+from shared import parseConfig, loadModulesFromConfig
 
 from twiggy import log; logger = log.name(__name__)
 
@@ -24,15 +28,9 @@ class Module(object):
     # Name of the module
     name = "Undefined"
 
-    def __init__(self, publisher):
-        """
-        Initialize module
-
-        :publisher: Publisher to use when publishing data
-        """
-
-        self.publisher = publisher
-        self.greenlet = None
+    def __init__(self):
+        self.publisher = None
+        self.greenlet  = None
 
     def start(self):
         """Start the gatherer"""
@@ -61,19 +59,35 @@ class NetworkModule(Module):
 
     name = "net"
 
+    def __init__(self, interface = None):
+        """
+        Initialize NetworModule
+
+        :interface: Interface to gather statistics from
+        """
+
+        self.interface = interface
+
+        Module.__init__(self)
+
     def run(self):
-        stream_network_throughput_rolling_avg(callback = self.callback)
+        stream_network_throughput_rolling_avg(callback = self.callback,
+                                              interface = self.interface)
 
     def callback(self, average):
-        self.publishSingle("average", average)
+        interface = "all" if not self.interface else self.interface
+        keyName   = "average-{}".format(interface)
+
+        self.publishSingle(keyName, average)
 
 class Publisher(object):
     def __init__(self, target):
         self.target = target
         self.modules = []
 
-    def loadModule(self, moduleClass):
-        self.modules.append(moduleClass(self))
+    def addModule(self, module):
+        self.modules.append(module)
+        module.publisher = self
 
     def publish(self, moduleName, data):
         self.target(moduleName, data)
@@ -101,7 +115,13 @@ def send_publish_socket(moduleName, packetData, client, additional = {}):
     packet.update(additional)
     client.send(ujson.dumps(packet))
 
-def start(address, hostname = socket.gethostname()):
+def moduleFinder(name):
+    moduleName = "{}Module".format(name)
+
+    moduleClass = getattr(sys.modules[__name__], moduleName)
+    return moduleClass
+
+def start(args, hostname = socket.gethostname()):
     """
     Starts the reporter
 
@@ -109,7 +129,30 @@ def start(address, hostname = socket.gethostname()):
     :hostname: Hostname
     """
 
-    client = Client(address)
+    # Modules will be completely overwritten but that's as intended
+    defaults = {
+        'host': '127.0.0.1',
+        'port': 13337,
+        'modules':{
+            'Network': [
+                {}
+            ]
+        }
+    }
+
+    # If no config file use dummy data
+    if args.configFile:
+        config = parseConfig(args.configFile, defaults = defaults)
+    else:
+        config = defaults
+
+    if args.port:
+        config["port"] = args.port
+    if args.host:
+        config["host"] = args.host
+
+    # Initialize networking client
+    client = Client((config["host"], config["port"]))
 
     # Create target function
     target = functools.partial(send_publish_socket, additional = {
@@ -118,7 +161,9 @@ def start(address, hostname = socket.gethostname()):
 
     # Initialize the publisher
     publisher = Publisher(target)
-    publisher.loadModule(NetworkModule)
+
+    # Load modules
+    loadModulesFromConfig(config, publisher, moduleFinder)
 
     # Start client and publisher
     client.connect()

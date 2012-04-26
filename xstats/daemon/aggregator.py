@@ -5,6 +5,7 @@ import functools
 import ujson
 import gevent
 import redis
+import sys
 
 import network
 
@@ -12,6 +13,8 @@ from bottle import run, get, Bottle
 from bottle.ext.websocket import GeventWebSocketServer, websocket
 
 from redis.exceptions import ConnectionError as RedisConnectionError
+
+from shared import parseConfig, loadModulesFromConfig
 
 from twiggy import log; logger = log.name(__name__)
 
@@ -48,6 +51,14 @@ class Module(object):
         """
         pass
 
+    def start(self):
+        """
+        Method called when module gets initialized, use to start any
+        greenlets, listeners, etc.
+        """
+
+        pass
+
 class WebsocketModule(Module):
     def __init__(self, host = '127.0.0.1', port = 8080):
         """
@@ -80,7 +91,7 @@ class WebsocketModule(Module):
             # Connection closed, remove client
             self.clients.remove(ws)
 
-    def listen(self):
+    def start(self):
         """Spawn the bottle webserver in a greenlet"""
         gevent.spawn(self._start)
 
@@ -175,27 +186,57 @@ class Publisher(object):
         data = ujson.loads(packet)
         self.publish(data)
 
-def start(port = 13337):
+    def start(self):
+        for module in self.modules:
+            module.start()
+
+def moduleFinder(name):
+    moduleName = "{}Module".format(name)
+
+    moduleClass = getattr(sys.modules[__name__], moduleName)
+    return moduleClass
+
+def start(args):
     """
     Starts the aggregator
 
     :port: Port to listen on for reporters
     """
 
-    # Setup websocket module
-    websocketModule = WebsocketModule()
-    websocketModule.listen()
-
-    # Setup redis module
-    redisModule = RedisModule()
-
-    # Setup publisher
     publisher = Publisher()
-    publisher.addModule(websocketModule)
-    publisher.addModule(redisModule)
+
+    defaults = {
+        'ip'     : '127.0.0.1',
+        'port'   : 13337,
+        'modules': {
+            'Redis': [
+                {}
+            ],
+            'Websocket': [
+                {}
+            ],
+        }
+    }
+
+
+    # If no config file use dummy data
+    if args.configFile:
+        config = parseConfig(args.configFile, defaults = defaults)
+    else:
+        config = defaults
+
+    # Load modules based on config
+    loadModulesFromConfig(config, publisher, moduleFinder)
+
+    # If args.port override other port config
+    if args.port:
+        config["port"] = args.port
+
 
     # Create server
-    server = Server(13337, publisher)
+    server = Server(config["port"], publisher)
+
+    publisher.start()
     server.listen()
 
     # Wait for the server to finish up

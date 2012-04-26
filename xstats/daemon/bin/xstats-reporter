@@ -10,16 +10,17 @@ def main():
     parser = argparse.ArgumentParser(description = "xStats Reporter")
     parser.add_argument("--port", "-p",
                         type    = int,
-                        default = 13337,
                         help    = "Port to connect to")
-    parser.add_argument("host",
-                        default = "localhost",
+    parser.add_argument("--host", "-H",
                         help    = "Host to connect to")
+    parser.add_argument("--config", "-c",
+                        dest    = 'configFile',
+                        help    = "Config file to use")
 
     args = parser.parse_args()
 
     logger.info("Starting xStats Reporter")
-    reporter.start((args.host, args.port))
+    reporter.start(args)
     logger.info("Exiting...")
 
 if __name__ == "__main__":
