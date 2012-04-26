@@ -131,44 +131,11 @@ class RedisModule(Module):
         :data: Data to push
         """
 
-        for key, value in packet["data"].iteritems():
-            self.pushSingle(packet["host"], packet["module"], key, value)
+        keyName = "{}-{}".format(packet["host"], packet["module"])
 
-    def pushSingle(self, hostname, module, key, value):
-        fullKey   = "{}-{}-{}".format(hostname, module, key)
+        self.log.debug("Setting {}:{}", keyName, packet["data"])
 
-        self.log.debug("Setting {}:{}", fullKey, value)
-
-        try:
-            self.redis.set(fullKey, value)
-            self.dump_cache()
-        except RedisConnectionError:
-            self.log.error("Connection failed...")
-
-            # Store in cache if failed
-            self.disconnectedCache[key] = value
-
-    def dump_cache(self, pipeline = None):
-        """
-        Try dumping the cache into redis if there's anything in it.
-
-        If this succeeds clear the cache.
-
-        :pipeline: Use this pipeline for all commands, if None don't pipeline
-        """
-
-        target = self.redis.pipeline()
-
-        # If there's a cache, dump it into redis
-        if len(self.disconnectedCache) > 0:
-            self.log.info("Dumping cache...")
-
-            for key, value in self.disconnectedCache.iteritems():
-                self.log.debug("    {}: {}", key, value)
-                target.set(key, value)
-
-            # Clear cache
-            self.disconnectedCache = {}
+        self.redis.hmset(keyName, packet["data"])
 
 class Publisher(object):
     def __init__(self):
