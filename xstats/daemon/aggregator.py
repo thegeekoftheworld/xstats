@@ -143,6 +143,11 @@ class RedisModule(Module):
             self.disconnectedCache[keyName] = packet["data"]
 
     def flushCache(self):
+        """
+        Flush the disconnectedCache if there's anything in it, unless it fails
+        then keep as is.
+        """
+
         if len(self.disconnectedCache) == 0:
             return
 
