@@ -20,12 +20,16 @@ def parseConfig(filename, defaults = None):
     :defaults: Default values
     """
 
+    # Copy defaults as base for result
     result = defaults.copy() if defaults else {}
 
+    # Load and parse the config file
     configText = open(filename).read()
     config = yaml.load(configText, Loader = yaml.CLoader)
 
+    # Update result with config
     result.update(config)
+
     return result
 
 def loadModulesFromConfig(config, host, finder):
