@@ -93,13 +93,13 @@ class WebsocketModule(Module):
         self.log.debug("Started server at {}:{}", self.host, self.port)
 
 
-    def push(self, data):
+    def push(self, packet):
         """Push data to all websocket clients that are connected"""
 
-        self.log.debug("Pushing {}", data)
+        self.log.debug("Pushing {}", packet)
 
         for client in self.clients:
-            client.send(ujson.dumps(data))
+            client.send(ujson.dumps(packet))
 
 class RedisModule(Module):
     def __init__(self, host='127.0.0.1', port = 6379, db = 0):
@@ -123,7 +123,7 @@ class RedisModule(Module):
         self.log = logger.name("redis") \
                          .fields(host = host, port = port, db = db)
 
-    def push(self, data):
+    def push(self, packet):
         """
         Push data to redis, if a connection can't be established store the data
         in the cache until we can successfully connect.
@@ -131,11 +131,11 @@ class RedisModule(Module):
         :data: Data to push
         """
 
-        for key, value in data["packet"].iteritems():
-            self.pushSingle(data["host"], key, value)
+        for key, value in packet["data"].iteritems():
+            self.pushSingle(packet["host"], packet["module"], key, value)
 
-    def pushSingle(self, hostname, key, value):
-        fullKey   = "{}-{}".format(hostname, key)
+    def pushSingle(self, hostname, module, key, value):
+        fullKey   = "{}-{}-{}".format(hostname, module, key)
 
         self.log.debug("Setting {}:{}", fullKey, value)
 

@@ -21,6 +21,9 @@ def utc_unix_timestamp():
 class Module(object):
     """Base for statistics gatherering modules"""
 
+    # Name of the module
+    name = "Undefined"
+
     def __init__(self, publisher):
         """
         Initialize module
@@ -48,19 +51,21 @@ class Module(object):
         :value: Value of the statistic
         """
 
-        self.publisher.publish({key: value})
+        self.publisher.publish(self.name, {key: value})
 
     def publishMulti(self, data):
-        self.publisher.publish(data)
+        self.publisher.publish(self.name, data)
 
 class NetworkModule(Module):
     """Reports network statistics, bandwidth usage up/down, packet/s, etc."""
+
+    name = "net"
 
     def run(self):
         stream_network_throughput_rolling_avg(callback = self.callback)
 
     def callback(self, average):
-        self.publishSingle("network-average", average)
+        self.publishSingle("average", average)
 
 class Publisher(object):
     def __init__(self, target):
@@ -70,14 +75,14 @@ class Publisher(object):
     def loadModule(self, moduleClass):
         self.modules.append(moduleClass(self))
 
-    def publish(self, data):
-        self.target(data)
+    def publish(self, moduleName, data):
+        self.target(moduleName, data)
 
     def start(self):
         for module in self.modules:
             module.start()
 
-def send_publish_socket(packet_data, client, additional = {}):
+def send_publish_socket(moduleName, packetData, client, additional = {}):
     """
     Function that is used by the publisher to send its data.
 
@@ -88,7 +93,8 @@ def send_publish_socket(packet_data, client, additional = {}):
     """
 
     packet = {
-        "packet"   : packet_data,
+        "module"   : moduleName,
+        "data"     : packetData,
         "timestamp": utc_unix_timestamp()
     }
 
