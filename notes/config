@@ -1,0 +1,35 @@
+Configuration file structure.
+
+Defaults are simply the defaults coded in for modules or custom defaults
+otherwise.
+
+Reporter
+========
+
+server:
+    port: ...           // default: 13337
+    host: ...           // default: localhost
+modules:
+    network:
+        -
+            interface: eth0
+            ...              // more options
+        -                
+            ...              // More instances
+
+Aggregator
+==========
+
+port: ...               // default 13337
+ip  : ...               // default 127.0.0.1
+modules:
+    redis:
+        -
+            host: ...       // default: 127.0.0.1
+            port: ...       // default: 6379
+            db  : ...       // default: 0
+    websocket:
+        -
+            host: ...       // default : 127.0.0.1
+            port: ...       // default: 8080
+        ...
