@@ -9,10 +9,11 @@ from datetime import datetime
 
 import ujson
 import gevent
+import psutil
 
 from network import Client
 
-from xstats.net import stream_network_throughput_rolling_avg
+from xstats.net import stream_network_throughput_rolling_avg, get_network_avg
 
 from shared import parseConfig, loadModulesFromConfig, BasePublisher
 
@@ -57,7 +58,7 @@ class Module(object):
 class BandwidthRollingAvgModule(Module):
     """Reports bandwidth rolling average."""
 
-    name = "BwRollingAvg"
+    name = "bandwidth-rolling"
 
     def __init__(self, interface = None):
         """
@@ -82,6 +83,80 @@ class BandwidthRollingAvgModule(Module):
             "{}-out".format(keyName): average[0],
             "{}-in".format(keyName): average[1],
         })
+
+class NetworkModule(Module):
+    """Reports network statistics"""
+
+    name = "network"
+
+    def __init__(self, interface = None):
+        """
+        Initialize NetworkModule
+
+        :interface: Interface, combined if None, specific interface if string.
+        """
+
+        self.interface = interface
+
+        Module.__init__(self)
+
+    def run(self):
+        interface = "all" if not self.interface else self.interface
+        keyName   = "average-{}".format(interface)
+
+        while True:
+            averages = get_network_avg(interface = self.interface)
+
+            self.publishMulti({
+                'bytes-sent': averages[0],
+                'bytes-recv': averages[1],
+                'packets-sent': averages[2],
+                'packets-recv': averages[3]
+            })
+
+class CpuModule(Module):
+    name = "cpu"
+
+    def __init__(self, interval = 1.0, percpu = False):
+        self.interval = interval
+        self.percpu = percpu
+
+    def run(self):
+        while True:
+            cpuLoad = psutil.cpu_percent(interval = self.interval,
+                                          percpu = self.percpu)
+
+            publishData = {
+                'num': len(cpuLoad)
+            }
+
+            if self.percpu:
+                for index in xrange(0, len(cpuLoad)):
+                    publishData["cpu%u" % index] = cpuLoad[index]
+            else:
+                publishData['avg'] = cpuLoad
+
+            self.publishMulti(publishData)
+
+class MemoryModule(Module):
+    name = "memory"
+
+    def run(self):
+        while True:
+            physical = psutil.phymem_usage()._asdict()
+            swap     = psutil.virtmem_usage()._asdict()
+
+            publishData = {}
+
+            for key, value in physical.iteritems():
+                publishData["physical-{}".format(key)] = value
+
+            for key, value in swap.iteritems():
+                publishData["swap-{}".format(key)] = value
+
+            self.publishMulti(publishData)
+
+            gevent.sleep(1)
 
 class Publisher(BasePublisher):
     def __init__(self, target):
