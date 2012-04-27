@@ -3,7 +3,7 @@ import time
 
 from collections import deque
 
-def _get_network_avg(attributes, sample_time = 1, interface = None):
+def get_network_avg(attributes = None, sample_time = 1, interface = None):
     """
     Get the average of a network related `attributes` for a
     specified `sample_time`
@@ -12,6 +12,10 @@ def _get_network_avg(attributes, sample_time = 1, interface = None):
 
     :returns: List (attribute1, attribute2)
     """
+
+    if not attributes:
+        attributes = ('bytes_sent', 'bytes_recv',
+                      'packets_sent', 'packets_recv')
 
     def calculate_average(attribute, old_values, new_values):
         """
@@ -57,7 +61,7 @@ def get_network_throughput_avg(sample_time = 1, interface = None):
     :returns: Tuple (bytes_out, bytes_in)
     """
 
-    return _get_network_avg(('bytes_sent', 'bytes_recv'), sample_time, interface)
+    return get_network_avg(('bytes_sent', 'bytes_recv'), sample_time, interface)
 
 def stream_network_throughput_rolling_avg(sample_num = 30, interval = 1, interface = None, callback = None):
     """
