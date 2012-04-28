@@ -1,0 +1,12 @@
+port: 13337
+host: "localhost"
+modules:
+    BandwidthRollingAvg:
+        - { 'interface': 'eth0' }
+        - { 'interface': 'lo' }
+    Network:
+        - { 'interface': 'eth0' }
+    Cpu:
+        - { 'percpu': false }
+    Memory:
+        - { }

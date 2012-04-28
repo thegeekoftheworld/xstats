@@ -1,0 +1,9 @@
+port: 13337
+ip  : "127.0.0.1"
+modules:
+    Redis:
+        - {}
+        - { 'db': 1 }
+    Websocket:
+        - {}
+        - { 'port': 8081 }
