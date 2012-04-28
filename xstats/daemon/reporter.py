@@ -126,11 +126,10 @@ class CpuModule(Module):
             cpuLoad = psutil.cpu_percent(interval = self.interval,
                                           percpu = self.percpu)
 
-            publishData = {
-                'num': len(cpuLoad)
-            }
+            publishData = {}
 
             if self.percpu:
+                publishData['num'] = len(cpuLoad)
                 for index in xrange(0, len(cpuLoad)):
                     publishData["cpu%u" % index] = cpuLoad[index]
             else:
