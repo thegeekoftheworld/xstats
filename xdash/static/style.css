@@ -1,0 +1,66 @@
+body
+{
+    background-color: #FFF;
+    color: #000;
+    font-family: Verdana, Sans-serif;
+}
+
+#container
+{
+    width: 1300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.title
+{
+    text-align: center;
+}
+
+.panel-gauge-titles h2
+{
+    width: 150px;
+    text-align: center;
+}
+.panel-gauge-titles h2:first-child
+{
+    float: left;
+}
+.panel-gauge-titles h2:last-child
+{
+    float: right;
+}
+
+.panel
+{
+    clear: both;
+}
+
+.left
+{
+    float: left;
+}
+.right
+{
+    float: right;
+}
+
+.graph
+{
+    width: 450px;
+    height: 200px;
+}
+.graph-container
+{
+    width: 450px;
+
+    margin-left: 20px;
+    margin-right: 20px;
+}
+.gauge
+{
+    width: 150px;
+    height: 150px;
+
+    margin-top: 95px;
+}

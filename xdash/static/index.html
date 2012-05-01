@@ -1,0 +1,85 @@
+<html>
+    <head>
+        <title>xStats Dashboard</title>
+        <link rel="stylesheet" href="static/style.css" />
+        <script type="text/javascript" src="/static/config.js"></script>
+
+        <script type="text/javascript" src="/static/jquery-1.7.2.min.js"></script>
+        <script type='text/javascript' src='https://www.google.com/jsapi'></script>
+
+        <script type="text/javascript" src="/static/smoothie.js"></script>
+        <script type="text/javascript" src="/static/jsrender.js"></script>
+
+        <script type="text/javascript" src="/static/main.js"></script>
+    </head>
+    <body>
+        <script id="rowTemplate" type="text/x-jsrender">
+            <div class="row">
+                <div class='panel-gauge-titles'>
+                    <h2>{{:left.label}}</h2>
+                    <h2>{{:right.label}}</h2>
+                </div>
+                <div class='panel'>
+                    <div class='gauge left' id='{{:left.host}}-cpu'></div>
+                    <div class='graph-container left'>
+                        <h2 class='graph-title'>TX%</h2>
+                        <canvas id='tx-pct-{{:#index}}' class='graph'></canvas>
+                    </div>
+                    
+                    <div class='gauge right' id='{{:right.host}}-cpu'></div>
+                    <div class='graph-container right'>
+                        <h2 class='graph-title'>RX%</h2>
+                        <canvas id='rx-pct-{{:#index}}' class='graph'></canvas>
+                    </div>
+                </div>
+
+                <div class='panel'>
+                    <div class='gauge left' id='{{:left.host}}-mem'></div>
+                    <div class='graph-container left'>
+                        <h2 class='graph-title'>TX</h2>
+                        <canvas id='tx-val-{{:#index}}' class='graph'></canvas>
+                    </div>
+
+                    <div class='gauge right' id='{{:right.host}}-mem'></div>
+                    <div class='graph-container right'>
+                        <h2 class='graph-title'>RX</h2>
+                        <canvas id='rx-val-{{:#index}}' class='graph'></canvas>
+                    </div>
+                </div>
+            </div>
+        </script>
+        <div id='container'>
+            <h1 class='title'>xStats Server Dashboard</h1>
+            <div class='panel-gauge-titles'>
+                <h2>US</h2>
+                <h2>DE</h2>
+            </div>
+            <div class='panel'>
+                <div class='gauge left' id='us-cpu'></div>
+                <div class='graph-container left'>
+                    <h2 class='graph-title'>TX%</h2>
+                    <canvas id='tx-pct' class='graph'></canvas>
+                </div>
+                
+                <div class='gauge right' id='de-cpu'></div>
+                <div class='graph-container right'>
+                    <h2 class='graph-title'>RX%</h2>
+                    <canvas id='rx-pct' class='graph'></canvas>
+                </div>
+            </div>
+
+            <div class='panel'>
+                <div class='gauge left' id='us-mem'></div>
+                <div class='graph-container left'>
+                    <h2 class='graph-title'>TX</h2>
+                    <canvas id='tx-val' class='graph'></canvas>
+                </div>
+
+                <div class='gauge right' id='de-mem'></div>
+                <div class='graph-container right'>
+                    <h2 class='graph-title'>RX</h2>
+                    <canvas id='rx-val' class='graph'></canvas>
+                </div>
+            </div>
+    </body>
+</html>
