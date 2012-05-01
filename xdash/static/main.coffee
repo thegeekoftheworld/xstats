@@ -4,6 +4,9 @@ class Config
     sets: (chunkSize = 2) ->
         @config[i..i+chunkSize] for i in [0..@config.length - 1] by chunkSize
 
+    namedSets: ->
+        ({left: set[0], right: set[1]} for set in @sets())
+
 init = ->
     config = new Config(configData)
     initLayout(config)
@@ -13,11 +16,10 @@ init = ->
     #socket = initWebsocket(config.websocketUri, series, gauges)
 
 initLayout = (config) ->
-    sets = config.sets()
-    namedSets = ({left: set[0], right: set[1]} for set in sets)
+    sets = config.namedSets()
 
     $("#container").html(
-        $("#rowTemplate").render(namedSets)
+        $("#rowTemplate").render(sets)
     )
 
 initGraphs = ->
