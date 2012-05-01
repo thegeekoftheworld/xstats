@@ -18,7 +18,7 @@ class Config
 
 class GaugeWrapper
     constructor: (@selector, @gauge, @data, @config) ->
-        @label    = @data.getValue(0, 0)
+        @label = @data.getValue(0, 0)
 
     update: (value) ->
         @data.setValue(0, 1, value)
