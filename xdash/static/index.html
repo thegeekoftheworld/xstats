@@ -20,13 +20,13 @@
                     <h2>{{:right.label}}</h2>
                 </div>
                 <div class='panel'>
-                    <div class='gauge left' id='{{:left.host}}-cpu'></div>
+                    <div class='gauge left' id='{{:left.hostname}}-cpu'></div>
                     <div class='graph-container left'>
                         <h2 class='graph-title'>TX%</h2>
                         <canvas id='tx-pct-{{:#index}}' class='graph'></canvas>
                     </div>
                     
-                    <div class='gauge right' id='{{:right.host}}-cpu'></div>
+                    <div class='gauge right' id='{{:right.hostname}}-cpu'></div>
                     <div class='graph-container right'>
                         <h2 class='graph-title'>RX%</h2>
                         <canvas id='rx-pct-{{:#index}}' class='graph'></canvas>
@@ -34,13 +34,13 @@
                 </div>
 
                 <div class='panel'>
-                    <div class='gauge left' id='{{:left.host}}-mem'></div>
+                    <div class='gauge left' id='{{:left.hostname}}-mem'></div>
                     <div class='graph-container left'>
                         <h2 class='graph-title'>TX</h2>
                         <canvas id='tx-val-{{:#index}}' class='graph'></canvas>
                     </div>
 
-                    <div class='gauge right' id='{{:right.host}}-mem'></div>
+                    <div class='gauge right' id='{{:right.hostname}}-mem'></div>
                     <div class='graph-container right'>
                         <h2 class='graph-title'>RX</h2>
                         <canvas id='rx-val-{{:#index}}' class='graph'></canvas>
