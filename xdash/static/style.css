@@ -12,15 +12,28 @@ body
     margin-right: auto;
 }
 
+.row
+{
+    clear: both;
+
+    margin-top: 20px;
+}
+
 .title
 {
     text-align: center;
 }
 
+.panel-gauge-titles
+{
+    position: relative;
+    top: 39px;
+}
 .panel-gauge-titles h2
 {
     width: 150px;
     text-align: center;
+    margin: 0;
 }
 .panel-gauge-titles h2:first-child
 {
@@ -48,7 +61,12 @@ body
 .graph
 {
     width: 450px;
-    height: 200px;
+    height: 150px;
+}
+.graph-title
+{
+    margin: 0;
+    margin-top: 10px;
 }
 .graph-container
 {
@@ -62,5 +80,5 @@ body
     width: 150px;
     height: 150px;
 
-    margin-top: 95px;
+    margin-top: 40px;
 }
