@@ -5,7 +5,7 @@ body
     font-family: Verdana, Sans-serif;
 }
 
-.title
+.title, .gauge-title
 {
     text-align: center;
 }
@@ -25,16 +25,10 @@ h2
     border: 1px #444 solid;
 }
 
-.gauge-title
-{
-    text-align: center;
-}
-
 .gauge
 {
-    width: 150px;
-    height: 150px;
 }
+
 .readout div:first-child
 {
     float: left;

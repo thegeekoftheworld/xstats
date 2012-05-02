@@ -127,12 +127,12 @@ class Application
         ])
 
         defaultConfig = {
-            width: 150,
-            height: 400,
+            width : 150,
+            height: 150,
+            max   : maxValue,
             animation: {
                 easing: 'inAndOut'
-            },
-            max: maxValue
+            }
         }
 
         gaugeWrapper = new GaugeWrapper(hostname, type, gauge,

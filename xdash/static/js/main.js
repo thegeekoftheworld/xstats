@@ -152,11 +152,11 @@
       initialData = google.visualization.arrayToDataTable([['Label', 'Value'], [label, initialValue]]);
       defaultConfig = {
         width: 150,
-        height: 400,
+        height: 150,
+        max: maxValue,
         animation: {
           easing: 'inAndOut'
-        },
-        max: maxValue
+        }
       };
       gaugeWrapper = new GaugeWrapper(hostname, type, gauge, initialData, defaultConfig);
       gaugeWrapper.draw();
