@@ -9,4 +9,3 @@ psutil==0.4.1
 redis==2.4.11
 ujson==1.18
 wsgiref==0.1.2
--e git+xgit:xstats@HEAD#egg=xstats-dev
