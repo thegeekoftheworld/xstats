@@ -196,7 +196,7 @@ def moduleFinder(name):
     moduleClass = getattr(sys.modules[__name__], moduleName)
     return moduleClass
 
-def start(args, hostname = socket.gethostname()):
+def start(args):
     """
     Starts the reporter
 
@@ -206,9 +206,10 @@ def start(args, hostname = socket.gethostname()):
 
     # Modules will be completely overwritten but that's as intended
     defaults = {
-        'host': '127.0.0.1',
-        'port': 13337,
-        'modules':{
+        'hostname': socket.gethostname(),
+        'host'    : '127.0.0.1',
+        'port'    : 13337,
+        'modules' : {
             'Network': [
                 {}
             ]
@@ -225,13 +226,15 @@ def start(args, hostname = socket.gethostname()):
         config["port"] = args.port
     if args.host:
         config["host"] = args.host
+    if args.hostname:
+        config['hostname'] = args.hostname
 
     # Initialize networking client
     client = Client((config["host"], config["port"]))
 
     # Create target function
     target = functools.partial(send_publish_socket, additional = {
-        "host": hostname
+        "host": config['hostname']
     }, client = client)
 
     # Initialize the publisher

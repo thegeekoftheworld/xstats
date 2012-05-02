@@ -13,6 +13,8 @@ def main():
                         help    = "Port to connect to")
     parser.add_argument("--host", "-H",
                         help    = "Host to connect to")
+    parser.add_argument("--hostname", "-n",
+                        help    = "Override the reported hostname")
     parser.add_argument("--config", "-c",
                         dest    = 'configFile',
                         help    = "Config file to use")
