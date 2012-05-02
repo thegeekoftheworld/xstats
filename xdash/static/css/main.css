@@ -1,22 +1,8 @@
 body
 {
-    background-color: #FFF;
-    color: #000;
+    background-color: #000;
+    color: #EEE;
     font-family: Verdana, Sans-serif;
-}
-
-#container
-{
-    width: 1300px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.row
-{
-    clear: both;
-
-    margin-top: 20px;
 }
 
 .title
@@ -24,61 +10,31 @@ body
     text-align: center;
 }
 
-.panel-gauge-titles
+.set
 {
-    position: relative;
-    top: 39px;
+    margin-bottom: 20px;
 }
-.panel-gauge-titles h2
+
+h2
 {
-    width: 150px;
-    text-align: center;
     margin: 0;
-}
-.panel-gauge-titles h2:first-child
-{
-    float: left;
-}
-.panel-gauge-titles h2:last-child
-{
-    float: right;
-}
-
-.panel
-{
-    clear: both;
-}
-
-.left
-{
-    float: left;
-}
-.right
-{
-    float: right;
 }
 
 .graph
 {
     width: 450px;
     height: 150px;
+    
+    border: 1px #444 solid;
 }
-.graph-title
-{
-    margin: 0;
-    margin-top: 10px;
-}
-.graph-container
-{
-    width: 450px;
 
-    margin-left: 20px;
-    margin-right: 20px;
+.gauge-title
+{
+    text-align: center;
 }
+
 .gauge
 {
     width: 150px;
     height: 150px;
-
-    margin-top: 40px;
 }

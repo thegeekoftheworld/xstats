@@ -16,38 +16,62 @@
     </head>
     <body>
         <script id="rowTemplate" type="text/x-jsrender">
-            <div class="row">
-                <div class="column grid_2">
-                    <div class='gauge' id='{{:left.hostname}}-cpu'></div>
-                    <div class='gauge' id='{{:left.hostname}}-mem'></div>
-                </div>
-                <div class="column grid_6">
-                    <div class='graph-container'>
+            <div class="set">
+                <div class="row">
+                    <div class="column grid_2">
+                        <h2 class='gauge-title'>{{:left.label}}</h2>
+                    </div>
+                    <div class="column grid_6">
                         <h2 class='graph-title'>TX%</h2>
+                    </div>
+                    <div class="column grid_6">
+                        <h2 class='graph-title'>RX%</h2>
+                    </div>
+                    <div class="column grid_2">
+                        <h2 class='gauge-title'>{{:right.label}}</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="column grid_2">
+                        <div class='gauge' id='{{:left.hostname}}-cpu'></div>
+                    </div>
+                    <div class="column grid_6">
                         <canvas id='tx-pct-{{:#index}}' class='graph'></canvas>
                     </div>
-                    <div class='graph-container'>
-                        <h2 class='graph-title'>TX</h2>
-                        <canvas id='tx-val-{{:#index}}' class='graph'></canvas>
-                    </div>
-
-                </div>
-                <div class="column grid_6">
-                    <div class='graph-container'>
-                        <h2 class='graph-title'>RX%</h2>
+                    <div class="column grid_6">
                         <canvas id='rx-pct-{{:#index}}' class='graph'></canvas>
                     </div>
-                    <div class='graph-container'>
-                        <h2 class='graph-title'>RX</h2>
-                        <canvas id='rx-val-{{:#index}}' class='graph'></canvas>
+                    <div class="column grid_2">
+                        <div class='gauge' id='{{:right.hostname}}-cpu'></div>
                     </div>
                 </div>
-                <div class="column grid_2">
-                    <div class='gauge' id='{{:right.hostname}}-cpu'></div>
-                    <div class='gauge' id='{{:right.hostname}}-mem'></div>
+                <div class="row">
+                    <div class="column grid_2">&nbsp;</div>
+                    <div class="column grid_6">
+                        <h2 class='graph-title'>TX</h2>
+                    </div>
+                    <div class="column grid_6">
+                        <h2 class='graph-title'>RX</h2>
+                    </div>
+                    <div class="column grid_2">&nbsp;</div>
+                </div>
+                <div class="row">
+                    <div class="column grid_2">
+                        <div class='gauge' id='{{:left.hostname}}-mem'></div>
+                    </div>
+                    <div class="column grid_6">
+                        <canvas id='tx-val-{{:#index}}' class='graph'></canvas>
+                    </div>
+                    <div class="column grid_6">
+                        <canvas id='rx-val-{{:#index}}' class='graph'></canvas>
+                    </div>
+                    <div class="column grid_2">
+                        <div class='gauge' id='{{:right.hostname}}-mem'></div>
+                    </div>
                 </div>
             </div>
         </script>
+        <h1 class='title'>xStats Dashboard</h1>
         <div id='container'></div>
     </body>
 </html>
