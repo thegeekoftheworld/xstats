@@ -47,25 +47,35 @@
     };
 
     Application.prototype.initGraphs = function() {
-      var graph, graphDiv, graphId, index, pctDefaults, set, sets, _i, _len, _ref, _results;
+      var defaults, graph, graphDiv, graphId, index, pctDefaults, set, sets, _i, _len, _ref, _results;
       sets = this.config.namedSets();
-      pctDefaults = {
+      defaults = {
+        millisPerPixel: 50,
+        grid: {
+          millisPerLine: 2500,
+          verticalSections: 2,
+          fillStyle: '#000000',
+          strokeStyle: '#444444',
+          lineWidth: 1
+        }
+      };
+      pctDefaults = $.extend({
         maxvalue: 100,
         minvalue: 0
-      };
+      }, defaults);
       for (index = _i = 0, _len = sets.length; _i < _len; index = ++_i) {
         set = sets[index];
         this.graphs["tx-pct-" + index] = new SmoothieChart(pctDefaults);
         this.graphs["rx-pct-" + index] = new SmoothieChart(pctDefaults);
-        this.graphs["tx-val-" + index] = new SmoothieChart();
-        this.graphs["rx-val-" + index] = new SmoothieChart();
+        this.graphs["tx-val-" + index] = new SmoothieChart(defaults);
+        this.graphs["rx-val-" + index] = new SmoothieChart(defaults);
       }
       _ref = this.graphs;
       _results = [];
       for (graphId in _ref) {
         graph = _ref[graphId];
         graphDiv = $("#" + graphId).get(0);
-        _results.push(graph.streamTo(graphDiv));
+        _results.push(graph.streamTo(graphDiv, 2000));
       }
       return _results;
     };

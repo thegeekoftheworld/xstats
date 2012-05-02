@@ -38,20 +38,30 @@ class Application
     initGraphs: ->
         sets = @config.namedSets()
 
-        pctDefaults = {
+        defaults = {
+            millisPerPixel: 50,
+            grid: {
+                millisPerLine: 2500,
+                verticalSections: 2,
+                fillStyle: '#000000',
+                strokeStyle: '#444444',
+                lineWidth: 1
+            }
+        }
+        pctDefaults = $.extend({
             maxvalue: 100,
             minvalue: 0,
-        }
+        }, defaults)
 
         for set, index in sets
             @graphs["tx-pct-#{index}"] = new SmoothieChart(pctDefaults)
             @graphs["rx-pct-#{index}"] = new SmoothieChart(pctDefaults)
-            @graphs["tx-val-#{index}"] = new SmoothieChart()
-            @graphs["rx-val-#{index}"] = new SmoothieChart()
+            @graphs["tx-val-#{index}"] = new SmoothieChart(defaults)
+            @graphs["rx-val-#{index}"] = new SmoothieChart(defaults)
 
         for graphId, graph of @graphs
             graphDiv = $("##{graphId}").get(0)
-            graph.streamTo(graphDiv)
+            graph.streamTo(graphDiv, 2000)
 
     initSeries: () ->
         sets   = @config.sets()
