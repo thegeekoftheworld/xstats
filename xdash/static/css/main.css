@@ -35,3 +35,11 @@ h2
     width: 150px;
     height: 150px;
 }
+.readout div:first-child
+{
+    float: left;
+}
+.readout div:last-child
+{
+    float: right;
+}

@@ -4,6 +4,11 @@ toObject = (tuples) ->
 
     return resultMap
 
+roundToDecimal = (number, decimals) ->
+    multiplier = Math.pow(10, decimals)
+
+    return Math.round(number * multiplier) / multiplier
+
 colouredSeries = (colour) ->
     {
         strokeStyle: 'rgba(' + (colour || '0, 255, 0') + ', 1)',
@@ -147,20 +152,28 @@ class Application
             that.handleWebsocketMessage(evt.data)
 
     handleWebsocketMessage: (data) ->
-        packet   = $.parseJSON(data)
-        hostname = packet.host
-        time     = new Date().getTime()
+        packet          = $.parseJSON(data)
+        hostname        = packet.host
+        escapedHostname = hostname.replace(/\./g, "\\.")
+        time            = new Date().getTime()
 
         switch packet.module
             when "network"
-                @series[hostname]["tx-val"].append(time, packet.data['bytes-sent'])
-                @series[hostname]["rx-val"].append(time, packet.data['bytes-recv'])
+                @series[hostname]["tx-val"].append(time, packet.data['bytes-sent'] / 1024)
+                @series[hostname]["rx-val"].append(time, packet.data['bytes-recv'] / 1024)
 
                 txPct = packet.data['bytes-sent'] / @config.get(hostname, 'bandwidth') * 100
                 rxPct = packet.data['bytes-recv'] / @config.get(hostname, 'bandwidth') * 100
 
                 @series[hostname]["tx-pct"].append(time, txPct)
                 @series[hostname]["rx-pct"].append(time, rxPct)
+
+                $("#tx-txt-#{escapedHostname}").html(
+                    roundToDecimal(packet.data['bytes-sent'] / 1024, 2)
+                )
+                $("#rx-txt-#{escapedHostname}").html(
+                    roundToDecimal(packet.data['bytes-recv'] / 1024, 2)
+                )
             when "memory"
                 usedMemory = Math.round(
                     @config.hostGet(hostname, 'ram') *
