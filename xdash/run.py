@@ -1,10 +1,4 @@
-import psutil
-import json
-import pprint
-import os
-import gevent
-
-from bottle import run, route, get, template, static_file
+from bottle import run, route, static_file
 
 @route('/')
 def index():
