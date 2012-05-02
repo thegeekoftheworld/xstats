@@ -4,7 +4,7 @@ from bottle import run, route, static_file
 def index():
     return serve_static("index.html")
 
-@route('/static/<filepath:path>')
+@route('/<filepath:path>')
 def serve_static(filepath):
     return static_file(filepath, root='static')
 
