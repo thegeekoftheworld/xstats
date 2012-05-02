@@ -5,7 +5,7 @@ setup(
     version='0.1.0',
     author='Xeross',
     author_email='xeross@theelitist.net',
-    description='',
+    description='Stats aggregator/reporter server/client with a modular approach',
     packages=find_packages(),
     install_requires=[],
     data_files=[],
