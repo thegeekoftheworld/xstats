@@ -59,10 +59,10 @@ class Application
         }, defaults)
 
         for set, index in sets
-            @graphs["tx-pct-#{index}"] = new SmoothieChart(pctDefaults)
-            @graphs["rx-pct-#{index}"] = new SmoothieChart(pctDefaults)
-            @graphs["tx-val-#{index}"] = new SmoothieChart(defaults)
-            @graphs["rx-val-#{index}"] = new SmoothieChart(defaults)
+            @graphs["sent-pct-#{index}"] = new SmoothieChart(pctDefaults)
+            @graphs["recv-pct-#{index}"] = new SmoothieChart(pctDefaults)
+            @graphs["sent-val-#{index}"] = new SmoothieChart(defaults)
+            @graphs["recv-val-#{index}"] = new SmoothieChart(defaults)
 
         for graphId, graph of @graphs
             graphDiv = $("##{graphId}").get(0)
@@ -75,32 +75,32 @@ class Application
         for host in hosts
             @series[host.hostname] = {}
 
-            @series[host.hostname]["tx-pct"] = new TimeSeries()
-            @series[host.hostname]["rx-pct"] = new TimeSeries()
-            @series[host.hostname]["tx-val"] = new TimeSeries()
-            @series[host.hostname]["rx-val"] = new TimeSeries()
+            @series[host.hostname]["sent-pct"] = new TimeSeries()
+            @series[host.hostname]["recv-pct"] = new TimeSeries()
+            @series[host.hostname]["sent-val"] = new TimeSeries()
+            @series[host.hostname]["recv-val"] = new TimeSeries()
 
         for set, i in sets
             leftSeries  = @series[set[0].hostname]
             rightSeries = @series[set[1].hostname]
 
-            @graphs["tx-pct-#{i}"].addTimeSeries(
-                leftSeries["tx-pct"], colouredSeries('0, 255, 0'))
-            @graphs["rx-pct-#{i}"].addTimeSeries(
-                leftSeries["rx-pct"], colouredSeries('0, 255, 0'))
-            @graphs["tx-val-#{i}"].addTimeSeries(
-                leftSeries["tx-val"], colouredSeries('0, 255, 0'))
-            @graphs["rx-val-#{i}"].addTimeSeries(
-                leftSeries["rx-val"], colouredSeries('0, 255, 0'))
+            @graphs["sent-pct-#{i}"].addTimeSeries(
+                leftSeries["sent-pct"], colouredSeries('0, 255, 0'))
+            @graphs["recv-pct-#{i}"].addTimeSeries(
+                leftSeries["recv-pct"], colouredSeries('0, 255, 0'))
+            @graphs["sent-val-#{i}"].addTimeSeries(
+                leftSeries["sent-val"], colouredSeries('0, 255, 0'))
+            @graphs["recv-val-#{i}"].addTimeSeries(
+                leftSeries["recv-val"], colouredSeries('0, 255, 0'))
 
-            @graphs["tx-pct-#{i}"].addTimeSeries(
-                rightSeries["tx-pct"], colouredSeries('255, 0, 0'))
-            @graphs["rx-pct-#{i}"].addTimeSeries(
-                rightSeries["rx-pct"], colouredSeries('255, 0, 0'))
-            @graphs["tx-val-#{i}"].addTimeSeries(
-                rightSeries["tx-val"], colouredSeries('255, 0, 0'))
-            @graphs["rx-val-#{i}"].addTimeSeries(
-                rightSeries["rx-val"], colouredSeries('255, 0, 0'))
+            @graphs["sent-pct-#{i}"].addTimeSeries(
+                rightSeries["sent-pct"], colouredSeries('255, 0, 0'))
+            @graphs["recv-pct-#{i}"].addTimeSeries(
+                rightSeries["recv-pct"], colouredSeries('255, 0, 0'))
+            @graphs["sent-val-#{i}"].addTimeSeries(
+                rightSeries["sent-val"], colouredSeries('255, 0, 0'))
+            @graphs["recv-val-#{i}"].addTimeSeries(
+                rightSeries["recv-val"], colouredSeries('255, 0, 0'))
 
     initGauges: ->
         gaugeList = []
@@ -159,19 +159,19 @@ class Application
 
         switch packet.module
             when "network"
-                @series[hostname]["tx-val"].append(time, packet.data['bytes-sent'] / 1024)
-                @series[hostname]["rx-val"].append(time, packet.data['bytes-recv'] / 1024)
+                @series[hostname]["sent-val"].append(time, packet.data['bytes-sent'] / 1024)
+                @series[hostname]["recv-val"].append(time, packet.data['bytes-recv'] / 1024)
 
                 txPct = packet.data['bytes-sent'] / @config.get(hostname, 'bandwidth') * 100
                 rxPct = packet.data['bytes-recv'] / @config.get(hostname, 'bandwidth') * 100
 
-                @series[hostname]["tx-pct"].append(time, txPct)
-                @series[hostname]["rx-pct"].append(time, rxPct)
+                @series[hostname]["sent-pct"].append(time, txPct)
+                @series[hostname]["recv-pct"].append(time, rxPct)
 
-                $("#tx-txt-#{escapedHostname}").html(
+                $("#sent-txt-#{escapedHostname}").html(
                     roundToDecimal(packet.data['bytes-sent'] / 1024, 2)
                 )
-                $("#rx-txt-#{escapedHostname}").html(
+                $("#recv-txt-#{escapedHostname}").html(
                     roundToDecimal(packet.data['bytes-recv'] / 1024, 2)
                 )
             when "memory"

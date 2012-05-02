@@ -36,10 +36,10 @@
                         <div class='gauge' id='{{:left.hostname}}-cpu'></div>
                     </div>
                     <div class="column grid_6">
-                        <canvas width="458" height="150" id='tx-pct-{{:#index}}' class='graph'></canvas>
+                        <canvas width="458" height="150" id='sent-pct-{{:#index}}' class='graph'></canvas>
                     </div>
                     <div class="column grid_6">
-                        <canvas width="458" height="150" id='rx-pct-{{:#index}}' class='graph'></canvas>
+                        <canvas width="458" height="150" id='recv-pct-{{:#index}}' class='graph'></canvas>
                     </div>
                     <div class="column grid_2">
                         <div class='gauge' id='{{:right.hostname}}-cpu'></div>
@@ -47,8 +47,8 @@
                 </div>
                 <div class="row">
                     <div class="column grid_2 readout">
-                        <div id='tx-txt-{{:left.hostname}}'>0.00</div>
-                        <div id='rx-txt-{{:left.hostname}}'>0.00</div>
+                        <div id='sent-txt-{{:left.hostname}}'>0.00</div>
+                        <div id='recv-txt-{{:left.hostname}}'>0.00</div>
                     </div>
                     <div class="column grid_6">
                         <h2 class='graph-title'>TX</h2>
@@ -57,8 +57,8 @@
                         <h2 class='graph-title'>RX</h2>
                     </div>
                     <div class="column grid_2 readout">
-                        <div id='tx-txt-{{:right.hostname}}'>0.00</div>
-                        <div id='rx-txt-{{:right.hostname}}'>0.00</div>
+                        <div id='sent-txt-{{:right.hostname}}'>0.00</div>
+                        <div id='recv-txt-{{:right.hostname}}'>0.00</div>
                     </div>
                 </div>
                 <div class="row">
@@ -66,10 +66,10 @@
                         <div class='gauge' id='{{:left.hostname}}-mem'></div>
                     </div>
                     <div class="column grid_6">
-                        <canvas width="458" height="150" id='tx-val-{{:#index}}' class='graph'></canvas>
+                        <canvas width="458" height="150" id='sent-val-{{:#index}}' class='graph'></canvas>
                     </div>
                     <div class="column grid_6">
-                        <canvas width="458" height="150" id='rx-val-{{:#index}}' class='graph'></canvas>
+                        <canvas width="458" height="150" id='recv-val-{{:#index}}' class='graph'></canvas>
                     </div>
                     <div class="column grid_2">
                         <div class='gauge' id='{{:right.hostname}}-mem'></div>

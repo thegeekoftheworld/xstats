@@ -71,10 +71,10 @@
       }, defaults);
       for (index = _i = 0, _len = sets.length; _i < _len; index = ++_i) {
         set = sets[index];
-        this.graphs["tx-pct-" + index] = new SmoothieChart(pctDefaults);
-        this.graphs["rx-pct-" + index] = new SmoothieChart(pctDefaults);
-        this.graphs["tx-val-" + index] = new SmoothieChart(defaults);
-        this.graphs["rx-val-" + index] = new SmoothieChart(defaults);
+        this.graphs["sent-pct-" + index] = new SmoothieChart(pctDefaults);
+        this.graphs["recv-pct-" + index] = new SmoothieChart(pctDefaults);
+        this.graphs["sent-val-" + index] = new SmoothieChart(defaults);
+        this.graphs["recv-val-" + index] = new SmoothieChart(defaults);
       }
       _ref = this.graphs;
       _results = [];
@@ -93,24 +93,24 @@
       for (_i = 0, _len = hosts.length; _i < _len; _i++) {
         host = hosts[_i];
         this.series[host.hostname] = {};
-        this.series[host.hostname]["tx-pct"] = new TimeSeries();
-        this.series[host.hostname]["rx-pct"] = new TimeSeries();
-        this.series[host.hostname]["tx-val"] = new TimeSeries();
-        this.series[host.hostname]["rx-val"] = new TimeSeries();
+        this.series[host.hostname]["sent-pct"] = new TimeSeries();
+        this.series[host.hostname]["recv-pct"] = new TimeSeries();
+        this.series[host.hostname]["sent-val"] = new TimeSeries();
+        this.series[host.hostname]["recv-val"] = new TimeSeries();
       }
       _results = [];
       for (i = _j = 0, _len1 = sets.length; _j < _len1; i = ++_j) {
         set = sets[i];
         leftSeries = this.series[set[0].hostname];
         rightSeries = this.series[set[1].hostname];
-        this.graphs["tx-pct-" + i].addTimeSeries(leftSeries["tx-pct"], colouredSeries('0, 255, 0'));
-        this.graphs["rx-pct-" + i].addTimeSeries(leftSeries["rx-pct"], colouredSeries('0, 255, 0'));
-        this.graphs["tx-val-" + i].addTimeSeries(leftSeries["tx-val"], colouredSeries('0, 255, 0'));
-        this.graphs["rx-val-" + i].addTimeSeries(leftSeries["rx-val"], colouredSeries('0, 255, 0'));
-        this.graphs["tx-pct-" + i].addTimeSeries(rightSeries["tx-pct"], colouredSeries('255, 0, 0'));
-        this.graphs["rx-pct-" + i].addTimeSeries(rightSeries["rx-pct"], colouredSeries('255, 0, 0'));
-        this.graphs["tx-val-" + i].addTimeSeries(rightSeries["tx-val"], colouredSeries('255, 0, 0'));
-        _results.push(this.graphs["rx-val-" + i].addTimeSeries(rightSeries["rx-val"], colouredSeries('255, 0, 0')));
+        this.graphs["sent-pct-" + i].addTimeSeries(leftSeries["sent-pct"], colouredSeries('0, 255, 0'));
+        this.graphs["recv-pct-" + i].addTimeSeries(leftSeries["recv-pct"], colouredSeries('0, 255, 0'));
+        this.graphs["sent-val-" + i].addTimeSeries(leftSeries["sent-val"], colouredSeries('0, 255, 0'));
+        this.graphs["recv-val-" + i].addTimeSeries(leftSeries["recv-val"], colouredSeries('0, 255, 0'));
+        this.graphs["sent-pct-" + i].addTimeSeries(rightSeries["sent-pct"], colouredSeries('255, 0, 0'));
+        this.graphs["recv-pct-" + i].addTimeSeries(rightSeries["recv-pct"], colouredSeries('255, 0, 0'));
+        this.graphs["sent-val-" + i].addTimeSeries(rightSeries["sent-val"], colouredSeries('255, 0, 0'));
+        _results.push(this.graphs["recv-val-" + i].addTimeSeries(rightSeries["recv-val"], colouredSeries('255, 0, 0')));
       }
       return _results;
     };
@@ -183,14 +183,14 @@
       time = new Date().getTime();
       switch (packet.module) {
         case "network":
-          this.series[hostname]["tx-val"].append(time, packet.data['bytes-sent'] / 1024);
-          this.series[hostname]["rx-val"].append(time, packet.data['bytes-recv'] / 1024);
+          this.series[hostname]["sent-val"].append(time, packet.data['bytes-sent'] / 1024);
+          this.series[hostname]["recv-val"].append(time, packet.data['bytes-recv'] / 1024);
           txPct = packet.data['bytes-sent'] / this.config.get(hostname, 'bandwidth') * 100;
           rxPct = packet.data['bytes-recv'] / this.config.get(hostname, 'bandwidth') * 100;
-          this.series[hostname]["tx-pct"].append(time, txPct);
-          this.series[hostname]["rx-pct"].append(time, rxPct);
-          $("#tx-txt-" + escapedHostname).html(roundToDecimal(packet.data['bytes-sent'] / 1024, 2));
-          return $("#rx-txt-" + escapedHostname).html(roundToDecimal(packet.data['bytes-recv'] / 1024, 2));
+          this.series[hostname]["sent-pct"].append(time, txPct);
+          this.series[hostname]["recv-pct"].append(time, rxPct);
+          $("#sent-txt-" + escapedHostname).html(roundToDecimal(packet.data['bytes-sent'] / 1024, 2));
+          return $("#recv-txt-" + escapedHostname).html(roundToDecimal(packet.data['bytes-recv'] / 1024, 2));
         case "memory":
           usedMemory = Math.round(this.config.hostGet(hostname, 'ram') * packet.data['physical-percent'] / 100);
           return this.gauges["" + hostname + "-mem"].update(usedMemory);
