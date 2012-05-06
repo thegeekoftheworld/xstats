@@ -1,16 +1,16 @@
 from functools import partial
-from twiggy import quickSetup
+from twiggy import quickSetup, levels
 
 import yaml
 
-def setup_logging():
+def setup_logging(level = 'DEBUG', file = None):
     """
     Initialize the logging
 
     TODO: More advanced configuration for logging, based on config?
     """
 
-    quickSetup()
+    quickSetup(min_level = getattr(levels, level), file = file)
 
 def parseConfig(filename, defaults = None):
     """
