@@ -162,8 +162,8 @@ class Application
                 @series[hostname]["sent-val"].append(time, packet.data['bytes-sent'] / 1024)
                 @series[hostname]["recv-val"].append(time, packet.data['bytes-recv'] / 1024)
 
-                txPct = packet.data['bytes-sent'] / @config.get(hostname, 'bandwidth') * 100
-                rxPct = packet.data['bytes-recv'] / @config.get(hostname, 'bandwidth') * 100
+                txPct = packet.data['bytes-sent'] / @config.hostGet(hostname, 'bandwidth') * 100
+                rxPct = packet.data['bytes-recv'] / @config.hostGet(hostname, 'bandwidth') * 100
 
                 @series[hostname]["sent-pct"].append(time, txPct)
                 @series[hostname]["recv-pct"].append(time, rxPct)
