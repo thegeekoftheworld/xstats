@@ -176,21 +176,27 @@
     };
 
     Application.prototype.handleWebsocketMessage = function(data) {
-      var escapedHostname, hostname, packet, rxPct, time, txPct, usedMemory;
+      var escapedHostname, hostname, packet, rxPct, rxVal, time, txPct, txVal, usedMemory;
       packet = $.parseJSON(data);
       hostname = packet.host;
       escapedHostname = hostname.replace(/\./g, "\\.");
       time = new Date().getTime();
       switch (packet.module) {
         case "network":
-          this.series[hostname]["sent-val"].append(time, packet.data['bytes-sent'] / 1024);
-          this.series[hostname]["recv-val"].append(time, packet.data['bytes-recv'] / 1024);
-          txPct = packet.data['bytes-sent'] / this.config.get(hostname, 'bandwidth') * 100;
-          rxPct = packet.data['bytes-recv'] / this.config.get(hostname, 'bandwidth') * 100;
+          txVal = packet.data['bytes-sent'] / 1024;
+          rxVal = packet.data['bytes-recv'] / 1024;
+          txPct = txVal / this.config.hostGet(hostname, 'bandwidth') * 100;
+          rxPct = rxVal / this.config.hostGet(hostname, 'bandwidth') * 100;
           this.series[hostname]["sent-pct"].append(time, txPct);
           this.series[hostname]["recv-pct"].append(time, rxPct);
-          $("#sent-txt-" + escapedHostname).html(roundToDecimal(packet.data['bytes-sent'] / 1024, 2));
-          return $("#recv-txt-" + escapedHostname).html(roundToDecimal(packet.data['bytes-recv'] / 1024, 2));
+          if (this.config.get('bits')) {
+            txVal *= 8;
+            rxVal *= 8;
+          }
+          this.series[hostname]["sent-val"].append(time, txVal);
+          this.series[hostname]["recv-val"].append(time, rxVal);
+          $("#sent-txt-" + escapedHostname).html(roundToDecimal(txval, 2));
+          return $("#recv-txt-" + escapedHostname).html(roundToDecimal(rxVal, 2));
         case "memory":
           usedMemory = Math.round(this.config.hostGet(hostname, 'ram') * packet.data['physical-percent'] / 100);
           return this.gauges["" + hostname + "-mem"].update(usedMemory);

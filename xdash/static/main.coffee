@@ -159,20 +159,27 @@ class Application
 
         switch packet.module
             when "network"
-                @series[hostname]["sent-val"].append(time, packet.data['bytes-sent'] / 1024)
-                @series[hostname]["recv-val"].append(time, packet.data['bytes-recv'] / 1024)
+                txVal = packet.data['bytes-sent'] / 1024
+                rxVal = packet.data['bytes-recv'] / 1024
 
-                txPct = packet.data['bytes-sent'] / @config.hostGet(hostname, 'bandwidth') * 100
-                rxPct = packet.data['bytes-recv'] / @config.hostGet(hostname, 'bandwidth') * 100
+                txPct = txVal / @config.hostGet(hostname, 'bandwidth') * 100
+                rxPct = rxVal / @config.hostGet(hostname, 'bandwidth') * 100
 
                 @series[hostname]["sent-pct"].append(time, txPct)
                 @series[hostname]["recv-pct"].append(time, rxPct)
 
+                if @config.get('bits')
+                    txVal *= 8
+                    rxVal *= 8
+
+                @series[hostname]["sent-val"].append(time, txVal)
+                @series[hostname]["recv-val"].append(time, rxVal)
+
                 $("#sent-txt-#{escapedHostname}").html(
-                    roundToDecimal(packet.data['bytes-sent'] / 1024, 2)
+                    roundToDecimal(txval, 2)
                 )
                 $("#recv-txt-#{escapedHostname}").html(
-                    roundToDecimal(packet.data['bytes-recv'] / 1024, 2)
+                    roundToDecimal(rxVal, 2)
                 )
             when "memory"
                 usedMemory = Math.round(
