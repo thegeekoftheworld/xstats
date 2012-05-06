@@ -1,7 +1,7 @@
 PyYAML==3.10
 Twiggy==0.4.4
 bottle==0.10.9
-bottle-websocket==0.2
+git+git://github.com/zeekay/bottle-websocket.git
 gevent==0.13.7
 gevent-websocket==0.3.6
 greenlet==0.3.4
