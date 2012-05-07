@@ -181,6 +181,12 @@ class Application
                 $("#recv-txt-#{escapedHostname}").html(
                     roundToDecimal(rxVal, 2)
                 )
+                $("#sent-pct-txt-#{escapedHostname}").html(
+                    roundToDecimal(txPct, 2)
+                )
+                $("#recv-pct-txt-#{escapedHostname}").html(
+                    roundToDecimal(rxPct, 2)
+                )
             when "memory"
                 usedMemory = Math.round(
                     @config.hostGet(hostname, 'ram') *

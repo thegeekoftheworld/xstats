@@ -196,7 +196,9 @@
           this.series[hostname]["sent-val"].append(time, txVal);
           this.series[hostname]["recv-val"].append(time, rxVal);
           $("#sent-txt-" + escapedHostname).html(roundToDecimal(txVal, 2));
-          return $("#recv-txt-" + escapedHostname).html(roundToDecimal(rxVal, 2));
+          $("#recv-txt-" + escapedHostname).html(roundToDecimal(rxVal, 2));
+          $("#sent-pct-txt-" + escapedHostname).html(roundToDecimal(txPct, 2));
+          return $("#recv-pct-txt-" + escapedHostname).html(roundToDecimal(rxPct, 2));
         case "memory":
           usedMemory = Math.round(this.config.hostGet(hostname, 'ram') * packet.data['physical-percent'] / 100);
           return this.gauges["" + hostname + "-mem"].update(usedMemory);
