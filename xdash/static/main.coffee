@@ -176,7 +176,7 @@ class Application
                 @series[hostname]["recv-val"].append(time, rxVal)
 
                 $("#sent-txt-#{escapedHostname}").html(
-                    roundToDecimal(txval, 2)
+                    roundToDecimal(txVal, 2)
                 )
                 $("#recv-txt-#{escapedHostname}").html(
                     roundToDecimal(rxVal, 2)
