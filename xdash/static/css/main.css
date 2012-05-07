@@ -25,6 +25,11 @@ h2
     border: 1px #444 solid;
 }
 
+.readout
+{
+    position: relative;
+    top: 7px;
+}
 .readout div:first-child
 {
     float: left;
@@ -32,4 +37,28 @@ h2
 .readout div:last-child
 {
     float: right;
+}
+
+.left-bullet
+{
+    color: #0F0;
+}
+.left-title
+{
+    text-indent: -20px;
+}
+
+.right-bullet
+{
+    color: #F00;
+}
+.right-title
+{
+    text-indent: 26px;
+}
+
+.graph-title
+{
+    float: left;
+    width: 180px;
 }

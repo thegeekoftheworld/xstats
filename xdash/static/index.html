@@ -19,16 +19,52 @@
             <div class="set">
                 <div class="row">
                     <div class="column grid_2">
-                        <h2 class='gauge-title'>{{:left.label}}</h2>
+                        <h2 class='gauge-title left-title'>
+                            <span class='bullet left-bullet'>&bull;</span>
+                            {{:left.label}}
+                        </h2>
                     </div>
                     <div class="column grid_6">
                         <h2 class='graph-title'>TX%</h2>
+
+                        <div class="readout">
+                            <div>
+                                <span class='bullet left-bullet'>&bull;</span>
+                                <span id='sent-pct-txt-{{:left.hostname}}'>
+                                    0.00
+                                </span>%
+                            </div>
+                            <div>
+                                <span id='sent-pct-txt-{{:right.hostname}}'>
+                                    0.00
+                                </span>%
+                                <span class='bullet right-bullet'>&bull;</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="column grid_6">
                         <h2 class='graph-title'>RX%</h2>
+
+                        <div class="readout">
+                            <div>
+                                <span class='bullet left-bullet'>&bull;</span>
+                                <span id='recv-pct-txt-{{:left.hostname}}'>
+                                    0.00
+                                </span>%
+                            </div>
+                            <div>
+                                <span id='recv-pct-txt-{{:right.hostname}}'>
+                                    0.00
+                                </span>%
+                                <span class='bullet right-bullet'>&bull;</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="column grid_2">
-                        <h2 class='gauge-title'>{{:right.label}}</h2>
+                        <h2 class='gauge-title right-title'>
+                            {{:right.label}}
+                            <span class='right-bullet'>&bull;</span>
+                        </h2>
                     </div>
                 </div>
                 <div class="row">
@@ -47,18 +83,54 @@
                 </div>
                 <div class="row">
                     <div class="column grid_2 readout">
-                        <div id='sent-txt-{{:left.hostname}}'>0.00</div>
-                        <div id='recv-txt-{{:left.hostname}}'>0.00</div>
+                        &nbsp;
+                        <!--
+                                <div id='sent-txt-{{:left.hostname}}'>0.00</div>
+                                <div id='recv-txt-{{:left.hostname}}'>0.00</div>
+                        -->
                     </div>
                     <div class="column grid_6">
                         <h2 class='graph-title'>TX</h2>
+
+                        <div class="readout">
+                            <div>
+                                <span class='bullet left-bullet'>&bull;</span>
+                                <span id='sent-txt-{{:left.hostname}}'>
+                                    0.00
+                                </span>KB/s
+                            </div>
+                            <div>
+                                <span id='sent-txt-{{:right.hostname}}'>
+                                    0.00
+                                </span>KB/s
+                                <span class='bullet right-bullet'>&bull;</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="column grid_6">
                         <h2 class='graph-title'>RX</h2>
+
+                        <div class="readout">
+                            <div>
+                                <span class='bullet left-bullet'>&bull;</span>
+                                <span id='recv-txt-{{:left.hostname}}'>
+                                    0.00
+                                </span>KB/s
+                            </div>
+                            <div>
+                                <span id='recv-txt-{{:right.hostname}}'>
+                                    0.00
+                                </span>KB/s
+                                <span class='bullet right-bullet'>&bull;</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="column grid_2 readout">
-                        <div id='sent-txt-{{:right.hostname}}'>0.00</div>
-                        <div id='recv-txt-{{:right.hostname}}'>0.00</div>
+                        &nbsp;
+                        <!--
+                            <div id='sent-txt-{{:right.hostname}}'>0.00</div>
+                            <div id='recv-txt-{{:right.hostname}}'>0.00</div>
+                        -->
                     </div>
                 </div>
                 <div class="row">
