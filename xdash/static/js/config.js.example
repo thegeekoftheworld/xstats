@@ -5,13 +5,13 @@ var configData = {
         {
             'hostname': 'example.domain.tld',     // Hostname
             'label': 'DE',                        // Label to show in columns
-            'bandwidth': (1024 * 1024 * 100) / 8, // In bytes
+            'bandwidth': (1024 * 100) / 8,        // In Kilobytes
             'ram': 4096                           // In MB
         },
         {
             'hostname': 'example2.domain.tld',    // Hostname
             'label': 'US',                        // Label to show in columns
-            'bandwidth': (1024 * 1024 * 100) / 8, // In bytes
+            'bandwidth': (1024 * 100) / 8,        // In Kilobytes
             'ram': 1536                           // In MB
         }
     ]

@@ -51,11 +51,11 @@ class Application
                 fillStyle: '#000000',
                 strokeStyle: '#444444',
                 lineWidth: 1
-            }
+            },
+            minValue: 0,
         }
         pctDefaults = $.extend({
-            maxvalue: 100,
-            minvalue: 0,
+            maxValue: 100
         }, defaults)
 
         for set, index in sets
