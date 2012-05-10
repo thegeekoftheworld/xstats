@@ -37,7 +37,9 @@ class Application
         sets = @config.namedSets()
 
         $("#container").html(
-            $("#rowTemplate").render(sets)
+            $("#rowTemplate").render(sets, {
+                unit: if @config.get('bits') then 'kb/s' else 'KB/s'
+            })
         )
 
     initGraphs: ->

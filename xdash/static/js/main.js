@@ -49,7 +49,9 @@
     Application.prototype.initLayout = function() {
       var sets;
       sets = this.config.namedSets();
-      return $("#container").html($("#rowTemplate").render(sets));
+      return $("#container").html($("#rowTemplate").render(sets, {
+        unit: this.config.get('bits') ? 'kb/s' : 'KB/s'
+      }));
     };
 
     Application.prototype.initGraphs = function() {
