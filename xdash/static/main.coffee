@@ -68,6 +68,7 @@ class Application
             else
                 @graphs["sent-pct-#{index}"] = new SmoothieChart(defaults)
                 @graphs["recv-pct-#{index}"] = new SmoothieChart(defaults)
+
             @graphs["sent-val-#{index}"] = new SmoothieChart(defaults)
             @graphs["recv-val-#{index}"] = new SmoothieChart(defaults)
 
@@ -203,6 +204,10 @@ class Application
 
                     txVal = packet.data["average-" + @config.hostGet(hostname, 'iface') + "-out"] / 1024
                     rxVal = packet.data["average-" + @config.hostGet(hostname, 'iface') + "-in"]  / 1024
+
+                    if @config.get('bits')
+                        txVal *= 8
+                        rxVal *= 8
 
                     @series[hostname]["sent-pct"].append(time, txVal)
                     @series[hostname]["recv-pct"].append(time, rxVal)

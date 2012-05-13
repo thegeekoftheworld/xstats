@@ -216,6 +216,10 @@
             }
             txVal = packet.data["average-" + this.config.hostGet(hostname, 'iface') + "-out"] / 1024;
             rxVal = packet.data["average-" + this.config.hostGet(hostname, 'iface') + "-in"] / 1024;
+            if (this.config.get('bits')) {
+              txVal *= 8;
+              rxVal *= 8;
+            }
             this.series[hostname]["sent-pct"].append(time, txVal);
             this.series[hostname]["recv-pct"].append(time, rxVal);
             $("#sent-pct-txt-" + escapedHostname).html(roundToDecimal(txVal, 2));
