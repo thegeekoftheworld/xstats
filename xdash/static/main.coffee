@@ -185,11 +185,11 @@ class Application
 
     convertBytesToValues: (hostname, val) ->
         val /= 1024
+        pct = val / @config.hostGet(hostname, 'bandwidth') * 100
 
         if @config.get('bits')
             val *= 8
         
-        pct = val / @config.hostGet(hostname, 'bandwidth') * 100
 
         return {'val': val, 'pct': pct}
 

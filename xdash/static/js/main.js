@@ -202,10 +202,10 @@
     Application.prototype.convertBytesToValues = function(hostname, val) {
       var pct;
       val /= 1024;
+      pct = val / this.config.hostGet(hostname, 'bandwidth') * 100;
       if (this.config.get('bits')) {
         val *= 8;
       }
-      pct = val / this.config.hostGet(hostname, 'bandwidth') * 100;
       return {
         'val': val,
         'pct': pct
