@@ -50,7 +50,8 @@
       var sets;
       sets = this.config.namedSets();
       return $("#container").html($("#rowTemplate").render(sets, {
-        unit: this.config.get('bits') ? 'kb/s' : 'KB/s'
+        unit: this.config.get('bits') ? 'kb/s' : 'KB/s',
+        avg: this.config.get('avg')
       }));
     };
 
@@ -187,20 +188,35 @@
         case "network":
           txVal = packet.data['bytes-sent'] / 1024;
           rxVal = packet.data['bytes-recv'] / 1024;
-          txPct = txVal / this.config.hostGet(hostname, 'bandwidth') * 100;
-          rxPct = rxVal / this.config.hostGet(hostname, 'bandwidth') * 100;
-          this.series[hostname]["sent-pct"].append(time, txPct);
-          this.series[hostname]["recv-pct"].append(time, rxPct);
           if (this.config.get('bits')) {
             txVal *= 8;
             rxVal *= 8;
           }
+          if (!this.config.get('avg')) {
+            txPct = txVal / this.config.hostGet(hostname, 'bandwidth') * 100;
+            rxPct = rxVal / this.config.hostGet(hostname, 'bandwidth') * 100;
+            this.series[hostname]["sent-pct"].append(time, txPct);
+            this.series[hostname]["recv-pct"].append(time, rxPct);
+            $("#sent-pct-txt-" + escapedHostname).html(roundToDecimal(txPct, 2));
+            $("#recv-pct-txt-" + escapedHostname).html(roundToDecimal(rxPct, 2));
+          }
           this.series[hostname]["sent-val"].append(time, txVal);
           this.series[hostname]["recv-val"].append(time, rxVal);
           $("#sent-txt-" + escapedHostname).html(roundToDecimal(txVal, 2));
-          $("#recv-txt-" + escapedHostname).html(roundToDecimal(rxVal, 2));
-          $("#sent-pct-txt-" + escapedHostname).html(roundToDecimal(txPct, 2));
-          return $("#recv-pct-txt-" + escapedHostname).html(roundToDecimal(rxPct, 2));
+          return $("#recv-txt-" + escapedHostname).html(roundToDecimal(rxVal, 2));
+        case "bandwidth-rolling":
+          if (this.config.get('avg')) {
+            if (!("average-" + this.config.hostGet(hostname, 'iface') + "-out" in packet.data)) {
+              return;
+            }
+            txVal = packet.data["average-" + this.config.hostGet(hostname, 'iface') + "-out"] / 1024;
+            rxVal = packet.data["average-" + this.config.hostGet(hostname, 'iface') + "-in"] / 1024;
+            this.series[hostname]["sent-pct"].append(time, txVal);
+            this.series[hostname]["recv-pct"].append(time, rxVal);
+            $("#sent-pct-txt-" + escapedHostname).html(roundToDecimal(txVal, 2));
+            return $("#recv-pct-txt-" + escapedHostname).html(roundToDecimal(rxVal, 2));
+          }
+          break;
         case "memory":
           usedMemory = Math.round(this.config.hostGet(hostname, 'ram') * packet.data['physical-percent'] / 100);
           return this.gauges["" + hostname + "-mem"].update(usedMemory);

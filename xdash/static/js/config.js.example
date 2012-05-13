@@ -1,18 +1,23 @@
 var configData = {
     'websocketUri': 'ws://localhost:8080/stats',  // Websocket to connect to
-    'bits'  : true,                               // True = bits, false = bytes
+    'bits'  : true,                               // true = bits, false = bytes
+    'avg'   : true,                               // true = avg,  false = pct 
     'hosts' : [
         {
             'hostname': 'example.domain.tld',     // Hostname
             'label': 'DE',                        // Label to show in columns
             'bandwidth': (1024 * 100) / 8,        // In Kilobytes
-            'ram': 4096                           // In MB
+            'ram': 4096,                          // In MB
+            'iface': 'eth0'                       // Network interface to report
+                                                  // Only used for rolling-avg
         },
         {
             'hostname': 'example2.domain.tld',    // Hostname
             'label': 'US',                        // Label to show in columns
             'bandwidth': (1024 * 100) / 8,        // In Kilobytes
-            'ram': 1536                           // In MB
+            'ram': 1536,                          // In MB
+            'iface': 'p4p1'                       // Network interface to report
+                                                  // Only used for rolling-avg
         }
     ]
 };

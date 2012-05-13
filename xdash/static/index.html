@@ -25,37 +25,49 @@
                         </h2>
                     </div>
                     <div class="column grid_6">
-                        <h2 class='graph-title'>TX%</h2>
+                        <h2 class='graph-title'>
+                            {{if avg}}
+                                TX (avg)
+                            {{else}}
+                                TX%
+                            {{/if}}
+                        </h2>
 
                         <div class="readout">
                             <div>
                                 <span class='bullet left-bullet'>&bull;</span>
                                 <span id='sent-pct-txt-{{:left.hostname}}'>
                                     0.00
-                                </span>%
+                                </span>{{if ~avg}}{{:~unit}}{{else}}%{{/if}}
                             </div>
                             <div>
                                 <span id='sent-pct-txt-{{:right.hostname}}'>
                                     0.00
-                                </span>%
+                                </span>{{if ~avg}}{{:~unit}}{{else}}%{{/if}}
                                 <span class='bullet right-bullet'>&bull;</span>
                             </div>
                         </div>
                     </div>
                     <div class="column grid_6">
-                        <h2 class='graph-title'>RX%</h2>
+                        <h2 class='graph-title'>
+                            {{if avg}}
+                                RX (avg)
+                            {{else}}
+                                RX%
+                            {{/if}}
+                        </h2>
 
                         <div class="readout">
                             <div>
                                 <span class='bullet left-bullet'>&bull;</span>
                                 <span id='recv-pct-txt-{{:left.hostname}}'>
                                     0.00
-                                </span>%
+                                </span>{{if ~avg}}{{:~unit}}{{else}}%{{/if}}
                             </div>
                             <div>
                                 <span id='recv-pct-txt-{{:right.hostname}}'>
                                     0.00
-                                </span>%
+                                </span>{{if ~avg}}{{:~unit}}{{else}}%{{/if}}
                                 <span class='bullet right-bullet'>&bull;</span>
                             </div>
                         </div>

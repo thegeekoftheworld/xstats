@@ -38,7 +38,8 @@ class Application
 
         $("#container").html(
             $("#rowTemplate").render(sets, {
-                unit: if @config.get('bits') then 'kb/s' else 'KB/s'
+                unit: if @config.get('bits') then 'kb/s' else 'KB/s',
+                avg:  @config.get('avg')
             })
         )
 
@@ -164,15 +165,23 @@ class Application
                 txVal = packet.data['bytes-sent'] / 1024
                 rxVal = packet.data['bytes-recv'] / 1024
 
-                txPct = txVal / @config.hostGet(hostname, 'bandwidth') * 100
-                rxPct = rxVal / @config.hostGet(hostname, 'bandwidth') * 100
-
-                @series[hostname]["sent-pct"].append(time, txPct)
-                @series[hostname]["recv-pct"].append(time, rxPct)
-
                 if @config.get('bits')
                     txVal *= 8
                     rxVal *= 8
+
+                if not @config.get('avg')
+                    txPct = txVal / @config.hostGet(hostname, 'bandwidth') * 100
+                    rxPct = rxVal / @config.hostGet(hostname, 'bandwidth') * 100
+
+                    @series[hostname]["sent-pct"].append(time, txPct)
+                    @series[hostname]["recv-pct"].append(time, rxPct)
+
+                    $("#sent-pct-txt-#{escapedHostname}").html(
+                        roundToDecimal(txPct, 2)
+                    )
+                    $("#recv-pct-txt-#{escapedHostname}").html(
+                        roundToDecimal(rxPct, 2)
+                    )
 
                 @series[hostname]["sent-val"].append(time, txVal)
                 @series[hostname]["recv-val"].append(time, rxVal)
@@ -183,12 +192,23 @@ class Application
                 $("#recv-txt-#{escapedHostname}").html(
                     roundToDecimal(rxVal, 2)
                 )
-                $("#sent-pct-txt-#{escapedHostname}").html(
-                    roundToDecimal(txPct, 2)
-                )
-                $("#recv-pct-txt-#{escapedHostname}").html(
-                    roundToDecimal(rxPct, 2)
-                )
+            when "bandwidth-rolling"
+                if @config.get('avg')
+                    if "average-" + @config.hostGet(hostname, 'iface') + "-out" not of packet.data
+                        return
+
+                    txVal = packet.data["average-" + @config.hostGet(hostname, 'iface') + "-out"] / 1024
+                    rxVal = packet.data["average-" + @config.hostGet(hostname, 'iface') + "-in"]  / 1024
+
+                    @series[hostname]["sent-pct"].append(time, txVal)
+                    @series[hostname]["recv-pct"].append(time, rxVal)
+
+                    $("#sent-pct-txt-#{escapedHostname}").html(
+                        roundToDecimal(txVal, 2)
+                    )
+                    $("#recv-pct-txt-#{escapedHostname}").html(
+                        roundToDecimal(rxVal, 2)
+                    )
             when "memory"
                 usedMemory = Math.round(
                     @config.hostGet(hostname, 'ram') *
