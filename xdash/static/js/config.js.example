@@ -1,6 +1,6 @@
 var configData = {
     'websocketUri': 'ws://localhost:8080/stats',  // Websocket to connect to
-    'bits'  : true                                // True = bits, false = bytes
+    'bits'  : true,                               // True = bits, false = bytes
     'hosts' : [
         {
             'hostname': 'example.domain.tld',     // Hostname
