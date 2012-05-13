@@ -62,8 +62,12 @@ class Application
         }, defaults)
 
         for set, index in sets
-            @graphs["sent-pct-#{index}"] = new SmoothieChart(pctDefaults)
-            @graphs["recv-pct-#{index}"] = new SmoothieChart(pctDefaults)
+            if not @config.get('avg')
+                @graphs["sent-pct-#{index}"] = new SmoothieChart(pctDefaults)
+                @graphs["recv-pct-#{index}"] = new SmoothieChart(pctDefaults)
+            else
+                @graphs["sent-pct-#{index}"] = new SmoothieChart(defaults)
+                @graphs["recv-pct-#{index}"] = new SmoothieChart(defaults)
             @graphs["sent-val-#{index}"] = new SmoothieChart(defaults)
             @graphs["recv-val-#{index}"] = new SmoothieChart(defaults)
 

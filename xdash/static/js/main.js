@@ -74,8 +74,13 @@
       }, defaults);
       for (index = _i = 0, _len = sets.length; _i < _len; index = ++_i) {
         set = sets[index];
-        this.graphs["sent-pct-" + index] = new SmoothieChart(pctDefaults);
-        this.graphs["recv-pct-" + index] = new SmoothieChart(pctDefaults);
+        if (!this.config.get('avg')) {
+          this.graphs["sent-pct-" + index] = new SmoothieChart(pctDefaults);
+          this.graphs["recv-pct-" + index] = new SmoothieChart(pctDefaults);
+        } else {
+          this.graphs["sent-pct-" + index] = new SmoothieChart(defaults);
+          this.graphs["recv-pct-" + index] = new SmoothieChart(defaults);
+        }
         this.graphs["sent-val-" + index] = new SmoothieChart(defaults);
         this.graphs["recv-val-" + index] = new SmoothieChart(defaults);
       }
