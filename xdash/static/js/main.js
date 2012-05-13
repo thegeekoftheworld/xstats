@@ -18,12 +18,22 @@
     return Math.round(number * multiplier) / multiplier;
   };
 
-  colouredSeries = function(colour) {
-    return {
-      strokeStyle: 'rgba(' + (colour || '0, 255, 0') + ', 1)',
-      fillStyle: 'rgba(' + (colour || '0, 255, 0') + ', 0.4)',
+  colouredSeries = function(colour, stroke) {
+    var data;
+    if (stroke == null) {
+      stroke = false;
+    }
+    data = {
       lineWidth: 3
     };
+    if (stroke) {
+      data.strokeStyle = 'rgba(' + (colour || '0, 255, 0') + ', 1)';
+      data.fillStyle = 'rgba(' + (colour || '0, 255, 0') + ', 0)';
+    } else {
+      data.strokeStyle = 'rgba(' + (colour || '0, 255, 0') + ', 0)';
+      data.fillStyle = 'rgba(' + (colour || '0, 255, 0') + ', 0.4)';
+    }
+    return data;
   };
 
   Application = (function() {
@@ -50,8 +60,7 @@
       var sets;
       sets = this.config.namedSets();
       return $("#container").html($("#rowTemplate").render(sets, {
-        unit: this.config.get('bits') ? 'kb/s' : 'KB/s',
-        avg: this.config.get('avg')
+        unit: this.config.get('bits') ? 'kb/s' : 'KB/s'
       }));
     };
 
@@ -74,13 +83,8 @@
       }, defaults);
       for (index = _i = 0, _len = sets.length; _i < _len; index = ++_i) {
         set = sets[index];
-        if (!this.config.get('avg')) {
-          this.graphs["sent-pct-" + index] = new SmoothieChart(pctDefaults);
-          this.graphs["recv-pct-" + index] = new SmoothieChart(pctDefaults);
-        } else {
-          this.graphs["sent-pct-" + index] = new SmoothieChart(defaults);
-          this.graphs["recv-pct-" + index] = new SmoothieChart(defaults);
-        }
+        this.graphs["sent-pct-" + index] = new SmoothieChart(pctDefaults);
+        this.graphs["recv-pct-" + index] = new SmoothieChart(pctDefaults);
         this.graphs["sent-val-" + index] = new SmoothieChart(defaults);
         this.graphs["recv-val-" + index] = new SmoothieChart(defaults);
       }
@@ -101,24 +105,36 @@
       for (_i = 0, _len = hosts.length; _i < _len; _i++) {
         host = hosts[_i];
         this.series[host.hostname] = {};
-        this.series[host.hostname]["sent-pct"] = new TimeSeries();
-        this.series[host.hostname]["recv-pct"] = new TimeSeries();
-        this.series[host.hostname]["sent-val"] = new TimeSeries();
-        this.series[host.hostname]["recv-val"] = new TimeSeries();
+        this.series[host.hostname]["sent-pct-cur"] = new TimeSeries();
+        this.series[host.hostname]["recv-pct-cur"] = new TimeSeries();
+        this.series[host.hostname]["sent-val-cur"] = new TimeSeries();
+        this.series[host.hostname]["recv-val-cur"] = new TimeSeries();
+        this.series[host.hostname]["sent-pct-avg"] = new TimeSeries();
+        this.series[host.hostname]["recv-pct-avg"] = new TimeSeries();
+        this.series[host.hostname]["sent-val-avg"] = new TimeSeries();
+        this.series[host.hostname]["recv-val-avg"] = new TimeSeries();
       }
       _results = [];
       for (i = _j = 0, _len1 = sets.length; _j < _len1; i = ++_j) {
         set = sets[i];
         leftSeries = this.series[set[0].hostname];
         rightSeries = this.series[set[1].hostname];
-        this.graphs["sent-pct-" + i].addTimeSeries(leftSeries["sent-pct"], colouredSeries('0, 255, 0'));
-        this.graphs["recv-pct-" + i].addTimeSeries(leftSeries["recv-pct"], colouredSeries('0, 255, 0'));
-        this.graphs["sent-val-" + i].addTimeSeries(leftSeries["sent-val"], colouredSeries('0, 255, 0'));
-        this.graphs["recv-val-" + i].addTimeSeries(leftSeries["recv-val"], colouredSeries('0, 255, 0'));
-        this.graphs["sent-pct-" + i].addTimeSeries(rightSeries["sent-pct"], colouredSeries('255, 0, 0'));
-        this.graphs["recv-pct-" + i].addTimeSeries(rightSeries["recv-pct"], colouredSeries('255, 0, 0'));
-        this.graphs["sent-val-" + i].addTimeSeries(rightSeries["sent-val"], colouredSeries('255, 0, 0'));
-        _results.push(this.graphs["recv-val-" + i].addTimeSeries(rightSeries["recv-val"], colouredSeries('255, 0, 0')));
+        this.graphs["sent-pct-" + i].addTimeSeries(leftSeries["sent-pct-cur"], colouredSeries('0, 255, 0'));
+        this.graphs["recv-pct-" + i].addTimeSeries(leftSeries["recv-pct-cur"], colouredSeries('0, 255, 0'));
+        this.graphs["sent-val-" + i].addTimeSeries(leftSeries["sent-val-cur"], colouredSeries('0, 255, 0'));
+        this.graphs["recv-val-" + i].addTimeSeries(leftSeries["recv-val-cur"], colouredSeries('0, 255, 0'));
+        this.graphs["sent-pct-" + i].addTimeSeries(rightSeries["sent-pct-cur"], colouredSeries('255, 0, 0'));
+        this.graphs["recv-pct-" + i].addTimeSeries(rightSeries["recv-pct-cur"], colouredSeries('255, 0, 0'));
+        this.graphs["sent-val-" + i].addTimeSeries(rightSeries["sent-val-cur"], colouredSeries('255, 0, 0'));
+        this.graphs["recv-val-" + i].addTimeSeries(rightSeries["recv-val-cur"], colouredSeries('255, 0, 0'));
+        this.graphs["sent-pct-" + i].addTimeSeries(leftSeries["sent-pct-avg"], colouredSeries('0, 255, 0', true));
+        this.graphs["recv-pct-" + i].addTimeSeries(leftSeries["recv-pct-avg"], colouredSeries('0, 255, 0', true));
+        this.graphs["sent-val-" + i].addTimeSeries(leftSeries["sent-val-avg"], colouredSeries('0, 255, 0', true));
+        this.graphs["recv-val-" + i].addTimeSeries(leftSeries["recv-val-avg"], colouredSeries('0, 255, 0', true));
+        this.graphs["sent-pct-" + i].addTimeSeries(rightSeries["sent-pct-avg"], colouredSeries('255, 0, 0', true));
+        this.graphs["recv-pct-" + i].addTimeSeries(rightSeries["recv-pct-avg"], colouredSeries('255, 0, 0', true));
+        this.graphs["sent-val-" + i].addTimeSeries(rightSeries["sent-val-avg"], colouredSeries('255, 0, 0', true));
+        _results.push(this.graphs["recv-val-" + i].addTimeSeries(rightSeries["recv-val-avg"], colouredSeries('255, 0, 0', true)));
       }
       return _results;
     };
@@ -183,49 +199,47 @@
       };
     };
 
+    Application.prototype.convertBytesToValues = function(hostname, val) {
+      var pct;
+      val /= 1024;
+      if (this.config.get('bits')) {
+        val *= 8;
+      }
+      pct = val / this.config.hostGet(hostname, 'bandwidth') * 100;
+      return {
+        'val': val,
+        'pct': pct
+      };
+    };
+
     Application.prototype.handleWebsocketMessage = function(data) {
-      var escapedHostname, hostname, packet, rxPct, rxVal, time, txPct, txVal, usedMemory;
+      var escapedHostname, hostname, packet, rx, time, tx, usedMemory;
       packet = $.parseJSON(data);
       hostname = packet.host;
       escapedHostname = hostname.replace(/\./g, "\\.");
       time = new Date().getTime();
       switch (packet.module) {
         case "network":
-          txVal = packet.data['bytes-sent'] / 1024;
-          rxVal = packet.data['bytes-recv'] / 1024;
-          if (this.config.get('bits')) {
-            txVal *= 8;
-            rxVal *= 8;
-          }
-          if (!this.config.get('avg')) {
-            txPct = txVal / this.config.hostGet(hostname, 'bandwidth') * 100;
-            rxPct = rxVal / this.config.hostGet(hostname, 'bandwidth') * 100;
-            this.series[hostname]["sent-pct"].append(time, txPct);
-            this.series[hostname]["recv-pct"].append(time, rxPct);
-            $("#sent-pct-txt-" + escapedHostname).html(roundToDecimal(txPct, 2));
-            $("#recv-pct-txt-" + escapedHostname).html(roundToDecimal(rxPct, 2));
-          }
-          this.series[hostname]["sent-val"].append(time, txVal);
-          this.series[hostname]["recv-val"].append(time, rxVal);
-          $("#sent-txt-" + escapedHostname).html(roundToDecimal(txVal, 2));
-          return $("#recv-txt-" + escapedHostname).html(roundToDecimal(rxVal, 2));
+          tx = this.convertBytesToValues(hostname, packet.data['bytes-sent']);
+          rx = this.convertBytesToValues(hostname, packet.data['bytes-recv']);
+          this.series[hostname]["sent-pct-cur"].append(time, tx.pct);
+          this.series[hostname]["recv-pct-cur"].append(time, rx.pct);
+          this.series[hostname]["sent-val-cur"].append(time, tx.val);
+          this.series[hostname]["recv-val-cur"].append(time, rx.val);
+          $("#sent-pct-txt-" + escapedHostname).html(roundToDecimal(tx.pct, 2));
+          $("#recv-pct-txt-" + escapedHostname).html(roundToDecimal(rx.pct, 2));
+          $("#sent-txt-" + escapedHostname).html(roundToDecimal(tx.val, 2));
+          return $("#recv-txt-" + escapedHostname).html(roundToDecimal(rx.val, 2));
         case "bandwidth-rolling":
-          if (this.config.get('avg')) {
-            if (!("average-" + this.config.hostGet(hostname, 'iface') + "-out" in packet.data)) {
-              return;
-            }
-            txVal = packet.data["average-" + this.config.hostGet(hostname, 'iface') + "-out"] / 1024;
-            rxVal = packet.data["average-" + this.config.hostGet(hostname, 'iface') + "-in"] / 1024;
-            if (this.config.get('bits')) {
-              txVal *= 8;
-              rxVal *= 8;
-            }
-            this.series[hostname]["sent-pct"].append(time, txVal);
-            this.series[hostname]["recv-pct"].append(time, rxVal);
-            $("#sent-pct-txt-" + escapedHostname).html(roundToDecimal(txVal, 2));
-            return $("#recv-pct-txt-" + escapedHostname).html(roundToDecimal(rxVal, 2));
+          if (!("average-" + this.config.hostGet(hostname, 'iface') + "-out" in packet.data)) {
+            return;
           }
-          break;
+          tx = this.convertBytesToValues(hostname, packet.data["average-" + this.config.hostGet(hostname, 'iface') + "-out"]);
+          rx = this.convertBytesToValues(hostname, packet.data["average-" + this.config.hostGet(hostname, 'iface') + "-in"]);
+          this.series[hostname]["sent-val-avg"].append(time, tx.val);
+          this.series[hostname]["recv-val-avg"].append(time, rx.val);
+          this.series[hostname]["sent-pct-avg"].append(time, tx.pct);
+          return this.series[hostname]["recv-pct-avg"].append(time, rx.pct);
         case "memory":
           usedMemory = Math.round(this.config.hostGet(hostname, 'ram') * packet.data['physical-percent'] / 100);
           return this.gauges["" + hostname + "-mem"].update(usedMemory);

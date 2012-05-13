@@ -9,12 +9,19 @@ roundToDecimal = (number, decimals) ->
 
     return Math.round(number * multiplier) / multiplier
 
-colouredSeries = (colour) ->
-    {
-        strokeStyle: 'rgba(' + (colour || '0, 255, 0') + ', 1)',
-        fillStyle  : 'rgba(' + (colour || '0, 255, 0') + ', 0.4)',
+colouredSeries = (colour, stroke = false) ->
+    data = {
         lineWidth  : 3
     }
+
+    if stroke
+        data.strokeStyle = 'rgba(' + (colour || '0, 255, 0') + ', 1)'
+        data.fillStyle = 'rgba(' + (colour || '0, 255, 0') + ', 0)'
+    else
+        data.strokeStyle = 'rgba(' + (colour || '0, 255, 0') + ', 0)'
+        data.fillStyle = 'rgba(' + (colour || '0, 255, 0') + ', 0.4)'
+
+    return data
 
 
 class Application
@@ -38,8 +45,7 @@ class Application
 
         $("#container").html(
             $("#rowTemplate").render(sets, {
-                unit: if @config.get('bits') then 'kb/s' else 'KB/s',
-                avg:  @config.get('avg')
+                unit: if @config.get('bits') then 'kb/s' else 'KB/s'
             })
         )
 
@@ -62,13 +68,8 @@ class Application
         }, defaults)
 
         for set, index in sets
-            if not @config.get('avg')
-                @graphs["sent-pct-#{index}"] = new SmoothieChart(pctDefaults)
-                @graphs["recv-pct-#{index}"] = new SmoothieChart(pctDefaults)
-            else
-                @graphs["sent-pct-#{index}"] = new SmoothieChart(defaults)
-                @graphs["recv-pct-#{index}"] = new SmoothieChart(defaults)
-
+            @graphs["sent-pct-#{index}"] = new SmoothieChart(pctDefaults)
+            @graphs["recv-pct-#{index}"] = new SmoothieChart(pctDefaults)
             @graphs["sent-val-#{index}"] = new SmoothieChart(defaults)
             @graphs["recv-val-#{index}"] = new SmoothieChart(defaults)
 
@@ -83,32 +84,55 @@ class Application
         for host in hosts
             @series[host.hostname] = {}
 
-            @series[host.hostname]["sent-pct"] = new TimeSeries()
-            @series[host.hostname]["recv-pct"] = new TimeSeries()
-            @series[host.hostname]["sent-val"] = new TimeSeries()
-            @series[host.hostname]["recv-val"] = new TimeSeries()
+            @series[host.hostname]["sent-pct-cur"] = new TimeSeries()
+            @series[host.hostname]["recv-pct-cur"] = new TimeSeries()
+            @series[host.hostname]["sent-val-cur"] = new TimeSeries()
+            @series[host.hostname]["recv-val-cur"] = new TimeSeries()
+
+            @series[host.hostname]["sent-pct-avg"] = new TimeSeries()
+            @series[host.hostname]["recv-pct-avg"] = new TimeSeries()
+            @series[host.hostname]["sent-val-avg"] = new TimeSeries()
+            @series[host.hostname]["recv-val-avg"] = new TimeSeries()
 
         for set, i in sets
             leftSeries  = @series[set[0].hostname]
             rightSeries = @series[set[1].hostname]
 
             @graphs["sent-pct-#{i}"].addTimeSeries(
-                leftSeries["sent-pct"], colouredSeries('0, 255, 0'))
+                leftSeries["sent-pct-cur"], colouredSeries('0, 255, 0'))
             @graphs["recv-pct-#{i}"].addTimeSeries(
-                leftSeries["recv-pct"], colouredSeries('0, 255, 0'))
+                leftSeries["recv-pct-cur"], colouredSeries('0, 255, 0'))
             @graphs["sent-val-#{i}"].addTimeSeries(
-                leftSeries["sent-val"], colouredSeries('0, 255, 0'))
+                leftSeries["sent-val-cur"], colouredSeries('0, 255, 0'))
             @graphs["recv-val-#{i}"].addTimeSeries(
-                leftSeries["recv-val"], colouredSeries('0, 255, 0'))
+                leftSeries["recv-val-cur"], colouredSeries('0, 255, 0'))
 
             @graphs["sent-pct-#{i}"].addTimeSeries(
-                rightSeries["sent-pct"], colouredSeries('255, 0, 0'))
+                rightSeries["sent-pct-cur"], colouredSeries('255, 0, 0'))
             @graphs["recv-pct-#{i}"].addTimeSeries(
-                rightSeries["recv-pct"], colouredSeries('255, 0, 0'))
+                rightSeries["recv-pct-cur"], colouredSeries('255, 0, 0'))
             @graphs["sent-val-#{i}"].addTimeSeries(
-                rightSeries["sent-val"], colouredSeries('255, 0, 0'))
+                rightSeries["sent-val-cur"], colouredSeries('255, 0, 0'))
             @graphs["recv-val-#{i}"].addTimeSeries(
-                rightSeries["recv-val"], colouredSeries('255, 0, 0'))
+                rightSeries["recv-val-cur"], colouredSeries('255, 0, 0'))
+                
+            @graphs["sent-pct-#{i}"].addTimeSeries(
+                leftSeries["sent-pct-avg"], colouredSeries('0, 255, 0', true))
+            @graphs["recv-pct-#{i}"].addTimeSeries(
+                leftSeries["recv-pct-avg"], colouredSeries('0, 255, 0', true))
+            @graphs["sent-val-#{i}"].addTimeSeries(
+                leftSeries["sent-val-avg"], colouredSeries('0, 255, 0', true))
+            @graphs["recv-val-#{i}"].addTimeSeries(
+                leftSeries["recv-val-avg"], colouredSeries('0, 255, 0', true))
+
+            @graphs["sent-pct-#{i}"].addTimeSeries(
+                rightSeries["sent-pct-avg"], colouredSeries('255, 0, 0', true))
+            @graphs["recv-pct-#{i}"].addTimeSeries(
+                rightSeries["recv-pct-avg"], colouredSeries('255, 0, 0', true))
+            @graphs["sent-val-#{i}"].addTimeSeries(
+                rightSeries["sent-val-avg"], colouredSeries('255, 0, 0', true))
+            @graphs["recv-val-#{i}"].addTimeSeries(
+                rightSeries["recv-val-avg"], colouredSeries('255, 0, 0', true))
 
     initGauges: ->
         gaugeList = []
@@ -159,6 +183,16 @@ class Application
         socket.onmessage = (evt) ->
             that.handleWebsocketMessage(evt.data)
 
+    convertBytesToValues: (hostname, val) ->
+        val /= 1024
+
+        if @config.get('bits')
+            val *= 8
+        
+        pct = val / @config.hostGet(hostname, 'bandwidth') * 100
+
+        return {'val': val, 'pct': pct}
+
     handleWebsocketMessage: (data) ->
         packet          = $.parseJSON(data)
         hostname        = packet.host
@@ -167,57 +201,45 @@ class Application
 
         switch packet.module
             when "network"
-                txVal = packet.data['bytes-sent'] / 1024
-                rxVal = packet.data['bytes-recv'] / 1024
+                tx = @convertBytesToValues(hostname, packet.data['bytes-sent'])
+                rx = @convertBytesToValues(hostname, packet.data['bytes-recv'])
 
-                if @config.get('bits')
-                    txVal *= 8
-                    rxVal *= 8
+                @series[hostname]["sent-pct-cur"].append(time, tx.pct)
+                @series[hostname]["recv-pct-cur"].append(time, rx.pct)
+                @series[hostname]["sent-val-cur"].append(time, tx.val)
+                @series[hostname]["recv-val-cur"].append(time, rx.val)
 
-                if not @config.get('avg')
-                    txPct = txVal / @config.hostGet(hostname, 'bandwidth') * 100
-                    rxPct = rxVal / @config.hostGet(hostname, 'bandwidth') * 100
-
-                    @series[hostname]["sent-pct"].append(time, txPct)
-                    @series[hostname]["recv-pct"].append(time, rxPct)
-
-                    $("#sent-pct-txt-#{escapedHostname}").html(
-                        roundToDecimal(txPct, 2)
-                    )
-                    $("#recv-pct-txt-#{escapedHostname}").html(
-                        roundToDecimal(rxPct, 2)
-                    )
-
-                @series[hostname]["sent-val"].append(time, txVal)
-                @series[hostname]["recv-val"].append(time, rxVal)
-
+                $("#sent-pct-txt-#{escapedHostname}").html(
+                    roundToDecimal(tx.pct, 2)
+                )
+                $("#recv-pct-txt-#{escapedHostname}").html(
+                    roundToDecimal(rx.pct, 2)
+                )
                 $("#sent-txt-#{escapedHostname}").html(
-                    roundToDecimal(txVal, 2)
+                    roundToDecimal(tx.val, 2)
                 )
                 $("#recv-txt-#{escapedHostname}").html(
-                    roundToDecimal(rxVal, 2)
+                    roundToDecimal(rx.val, 2)
                 )
             when "bandwidth-rolling"
-                if @config.get('avg')
-                    if "average-" + @config.hostGet(hostname, 'iface') + "-out" not of packet.data
-                        return
+                if "average-" + @config.hostGet(hostname, 'iface') + "-out" not of packet.data
+                    return
 
-                    txVal = packet.data["average-" + @config.hostGet(hostname, 'iface') + "-out"] / 1024
-                    rxVal = packet.data["average-" + @config.hostGet(hostname, 'iface') + "-in"]  / 1024
+                tx = @convertBytesToValues(hostname, packet.data["average-" + @config.hostGet(hostname, 'iface') + "-out"])
+                rx = @convertBytesToValues(hostname, packet.data["average-" + @config.hostGet(hostname, 'iface') + "-in"])
 
-                    if @config.get('bits')
-                        txVal *= 8
-                        rxVal *= 8
+                @series[hostname]["sent-val-avg"].append(time, tx.val)
+                @series[hostname]["recv-val-avg"].append(time, rx.val)
 
-                    @series[hostname]["sent-pct"].append(time, txVal)
-                    @series[hostname]["recv-pct"].append(time, rxVal)
+                @series[hostname]["sent-pct-avg"].append(time, tx.pct)
+                @series[hostname]["recv-pct-avg"].append(time, rx.pct)
 
-                    $("#sent-pct-txt-#{escapedHostname}").html(
-                        roundToDecimal(txVal, 2)
-                    )
-                    $("#recv-pct-txt-#{escapedHostname}").html(
-                        roundToDecimal(rxVal, 2)
-                    )
+                #$("#sent-pct-txt-#{escapedHostname}").html(
+                #    roundToDecimal(tx.val, 2)
+                #)
+                #$("#recv-pct-txt-#{escapedHostname}").html(
+                #    roundToDecimal(rx.val, 2)
+                #)
             when "memory"
                 usedMemory = Math.round(
                     @config.hostGet(hostname, 'ram') *
