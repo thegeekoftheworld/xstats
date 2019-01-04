@@ -1,4 +1,4 @@
-PyYAML==3.10
+pyyaml>=4.2b1
 Twiggy==0.4.4
 bottle==0.10.9
 git+git://github.com/zeekay/bottle-websocket.git
